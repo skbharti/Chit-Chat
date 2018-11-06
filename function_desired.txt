@@ -1,0 +1,25 @@
+Group Chat
+
+Chat
+		- Create Account
+		- Login Account
+			- Individual Chat
+				- Send Message
+				- Send Files
+				- Add Request
+				- End Chat
+
+			- Group Chat
+				- Create Group Chat
+				- Start Group Chat
+					- Send Message
+					- Send Files
+					- End Chat
+				- Exit Group Chat
+			
+			- Update Account
+				- Change User Name
+				- Change Password
+				- Delete Account 
+		- Help
+		- Exit
