@@ -1,0 +1,5 @@
+Running Steps
+
+	- Install librepo : sudo apt install libgirepository1.0-dev 
+	- Install PyGObject	: pip install pygobject 
+	- Execute : python run_server_interface.py
