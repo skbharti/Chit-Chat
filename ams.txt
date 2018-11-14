@@ -1,2 +1,0 @@
-ams->skb: dhahka
-skb->ams: haxa
