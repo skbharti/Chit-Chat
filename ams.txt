@@ -1,2 +1,2 @@
-ams->skb: hello
-skb->ams: hey bitch
+ams->skb: dhahka
+skb->ams: haxa

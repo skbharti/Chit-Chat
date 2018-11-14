@@ -1,4 +1,2 @@
-skb->ams: haha
-SERVER->skb: The user you are looking for is not online.
-ams->skb: hello
-skb->ams: hey bitch
+ams->skb: dhahka
+skb->ams: haxa

@@ -16,6 +16,7 @@ TOO = '[TOO]'
 USERID = ''
 
 def client_program():
+	global USERID
 	host = socket.gethostname()  # as both code is running on same pc
 	file = open("port.txt","r") 
 	port = int(file.read())  # initiate port no above 1024
@@ -43,6 +44,8 @@ def client_program():
 	print('Authentication Successful Here!')
 
 	file = "./"+USERID+".txt"
+	f = open(file,"w")
+	f.close()
 
 	option = input('========================================================================\n\t\t[1.] Individual Chat [2.] Group Chat [3.] Exit\t\t\n========================================================================\n-> ')
 	if(option == '1'):
@@ -76,6 +79,7 @@ def client_program():
 		client_socket.close()  # close the connection
 	
 def gui():
+	global USERID
 	root = Tk()
 	S = Scrollbar(root)
 	T = Text(root, height=30, width=50)
@@ -83,9 +87,14 @@ def gui():
 	T.pack(side=LEFT, fill=Y)
 	S.config(command=T.yview)
 	T.config(yscrollcommand=S.set)
-	with open(USERID+".txt") as file:
-		data = file.read()
-	T.insert(END, data)
+	def update():
+		with open("./"+USERID+".txt") as file:
+			data = file.read()
+			T.delete("1.0", "end")
+			T.insert(END, data)
+		T.after(1000,update)
+	update()
+	
 	mainloop()
 
 

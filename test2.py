@@ -15,9 +15,17 @@ msg_list.pack()
 messages_frame.pack()
 
 entry_field = tkinter.Entry(top, textvariable=my_msg)
-entry_field.bind("<Return>", send)
+# entry_field.bind("<Return>", send)
 entry_field.pack()
-send_button = tkinter.Button(top, text="Send", command=send)
+send_button = tkinter.Button(top, text="Send", command=top.destroy)
 send_button.pack()
 
-top.protocol("WM_DELETE_WINDOW", on_closing)
+# top.protocol("WM_DELETE_WINDOW", on_closing)
+
+def update():
+	with open("skb.txt") as file:
+		data = file.read()
+		T.insert(END, data)
+	T.after(1000,update)
+
+tkinter.mainloop()
