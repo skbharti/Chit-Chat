@@ -5,6 +5,8 @@ import ast
 import threading
 from time import sleep
 
+from tkinter import *
+
 
 lock = threading.Lock()
 
@@ -39,13 +41,16 @@ def client_program():
 			USERID = l[1]
 
 	print('Authentication Successful Here!')
+
 	file = "./"+USERID+".txt"
-	
 
 	option = input('========================================================================\n\t\t[1.] Individual Chat [2.] Group Chat [3.] Exit\t\t\n========================================================================\n-> ')
 	if(option == '1'):
 		t = threading.Thread(target=recv_msg, args=(client_socket,file,USERID,))
-		
+
+		tgui = threading.Thread(target=gui, args=())
+		tgui.daemon = True
+		tgui.start()
 		t.daemon = True
 		t.start()
 		while(True):
@@ -70,6 +75,28 @@ def client_program():
 		client_socket.send(data_json.encode())
 		client_socket.close()  # close the connection
 	
+def gui():
+	root = Tk()
+	S = Scrollbar(root)
+	T = Text(root, height=30, width=50)
+	S.pack(side=RIGHT, fill=Y)
+	T.pack(side=LEFT, fill=Y)
+	S.config(command=T.yview)
+	T.config(yscrollcommand=S.set)
+	with open(USERID+".txt") as file:
+		data = file.read()
+	T.insert(END, data)
+	mainloop()
+
+
+def recv_msg(client_socket):
+	while(True):
+		data_json = client_socket.recv(1024).decode()
+		token, userdata = parse_json(data_json)
+		lock.acquire()
+		print(userdata)
+		lock.release()
+
 
 def recv_msg(client_socket,file,user):
 	while(True):
