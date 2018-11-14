@@ -98,14 +98,6 @@ def gui():
 	mainloop()
 
 
-def recv_msg(client_socket):
-	while(True):
-		data_json = client_socket.recv(1024).decode()
-		token, userdata = parse_json(data_json)
-		lock.acquire()
-		print(userdata)
-		lock.release()
-
 
 def recv_msg(client_socket,file,user):
 	while(True):
@@ -114,9 +106,9 @@ def recv_msg(client_socket,file,user):
 		f = open(file, "a")
 		f.write(serverdata['SEND_ID']+"->"+user+": "+serverdata['TEXT']+"\n")
 		f.close()
-		lock.acquire()
-		print(serverdata)
-		lock.release()
+		# lock.acquire()
+		# print(serverdata)
+		# lock.release()
 
 
 def authenticate(client_socket):

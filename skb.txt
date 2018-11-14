@@ -1,2 +1,2 @@
-ams->skb: dhahka
-skb->ams: haxa
+skb->ams: hey dude
+SERVER->skb: The user you are looking for is not online.
