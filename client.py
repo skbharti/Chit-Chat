@@ -2,11 +2,16 @@ import getpass
 import socket
 import json
 import ast
+import threading
+from time import sleep
 
+
+lock = threading.Lock()
 
 UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
 TOO = '[TOO]'
+USERID = ''
 
 def client_program():
 	host = socket.gethostname()  # as both code is running on same pc
@@ -18,7 +23,9 @@ def client_program():
 	client_socket = socket.socket()  # instantiate
 	client_socket.connect((host, port))  # connect to the server
 
-	response = authenticate(client_socket)
+	l = authenticate(client_socket)
+	response = l[0]
+	USERID = l[1]
 	
 	count = 0
 	while(response==0):
@@ -27,28 +34,54 @@ def client_program():
 		if(count>5):
 			print("Too many attempts!")
 			exit(0)
-		response = authenticate(client_socket)
+			l = authenticate(client_socket)
+			response = l[0]
+			USERID = l[1]
 
 	print('Authentication Successful Here!')
-	option = input('========================================================================\n\t\t[1.] Individual Chat [2.] Group Chat [3.] Exit\t\t\n========================================================================\n-> ')
-	if(option == 1):
-		connecting_user = input('User ID: ')
-		message = input('-> ')
-		data = {'TOKEN':'SINGLECHAT', 'USERDATA':{'RECV_ID': connecting_user, 'TEXT':message}}
-		data_json = json.dumps(data)
-		client_socket.send(data_json.encode())
+	file = "./"+USERID+".txt"
+	
 
-	elif(option == 2):
+	option = input('========================================================================\n\t\t[1.] Individual Chat [2.] Group Chat [3.] Exit\t\t\n========================================================================\n-> ')
+	if(option == '1'):
+		t = threading.Thread(target=recv_msg, args=(client_socket,file,USERID,))
+		
+		t.daemon = True
+		t.start()
+		while(True):
+			connecting_user = input('User ID: ')
+			message = input('-> ')
+			data = {'TOKEN':'SINGLECHAT', 'USERDATA':{'RECV_ID': connecting_user, 'TEXT':message}}
+			f = open(file, "a")
+			f.write(USERID+"->"+connecting_user+": "+message+"\n")
+			f.close()
+			data_json = json.dumps(data)
+			client_socket.send(data_json.encode())
+			sleep(0.1)
+
+				
+	if(option == 2):
 		pass
 		# implement group chat here
-	elif(option == 3):
+	if(option == 3):
 		data = {'TOKEN': 'END', 'USERDATA':''}
 		data_json = json.dumps(data)
+		
 		client_socket.send(data_json.encode())
 		client_socket.close()  # close the connection
 	
 
-	
+def recv_msg(client_socket,file,user):
+	while(True):
+		data_json = client_socket.recv(1024).decode()
+		token, serverdata = parse_json(data_json)
+		f = open(file, "a")
+		f.write(serverdata['SEND_ID']+"->"+user+": "+serverdata['TEXT']+"\n")
+		f.close()
+		lock.acquire()
+		print(serverdata)
+		lock.release()
+
 
 def authenticate(client_socket):
 	userid = input("Enter your userid: ")
@@ -61,9 +94,9 @@ def authenticate(client_socket):
 	
 	token, serverdata = parse_json(data_json)
 	if(token=='SUCCESS'):
-		return 1
+		return [1,userid]
 	else:
-		return 0
+		return [0,userid]
 
 def handle_chat(client_socket):
 	while(True):
@@ -78,9 +111,9 @@ def handle_chat(client_socket):
 			print(userdata)
 
 def parse_json(data_json):
-    data = ast.literal_eval(data_json)
-    print(data,type(data))
-    return data['TOKEN'], data['SERVERDATA']
+	data = ast.literal_eval(data_json)
+	# print(data,type(data))
+	return data['TOKEN'], data['SERVERDATA']
 
 
 if __name__ == '__main__':
