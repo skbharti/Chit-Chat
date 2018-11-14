@@ -20,7 +20,7 @@ class Handler:
 builder = Gtk.Builder()
 builder.add_from_file("interfaces/server_interface.glade")
 builder.connect_signals(Handler())
-
+print("Starting Server Interface GUI")
 window = builder.get_object("main_window")
 window.show_all()
 

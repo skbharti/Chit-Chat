@@ -3,3 +3,9 @@ Running Steps
 	- Install librepo : sudo apt install libgirepository1.0-dev 
 	- Install PyGObject	: pip install pygobject 
 	- Execute : python run_server_interface.py
+
+
+Useful Link for Development
+	- https://python-gtk-3-tutorial.readthedocs.io/en/latest/
+
+	- https://askubuntu.com/questions/435629/how-to-get-text-buffer-from-file-and-loading-into-textview-using-python-and-gtk

@@ -86,11 +86,11 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="user_login" swapped="no"/>
+            <signal name="pressed" handler="user_login" swapped="no"/>
           </object>
           <packing>
             <property name="x">200</property>
-            <property name="y">385</property>
+            <property name="y">400</property>
           </packing>
         </child>
         <child>
@@ -105,19 +105,20 @@
           </object>
           <packing>
             <property name="x">500</property>
-            <property name="y">385</property>
+            <property name="y">400</property>
           </packing>
         </child>
         <child>
           <object class="GtkTextView">
             <property name="width_request">800</property>
-            <property name="height_request">80</property>
+            <property name="height_request">0</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="editable">False</property>
+            <property name="cursor_visible">False</property>
           </object>
           <packing>
             <property name="x">80</property>
-            <property name="y">502</property>
           </packing>
         </child>
         <child>
@@ -130,7 +131,7 @@
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_File</property>
+                <property name="label" translatable="yes">_Options</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -143,6 +144,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="quit_window" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -173,6 +175,20 @@
               </object>
             </child>
           </object>
+        </child>
+        <child>
+          <object class="GtkTextView">
+            <property name="width_request">850</property>
+            <property name="height_request">80</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="editable">False</property>
+            <property name="cursor_visible">False</property>
+          </object>
+          <packing>
+            <property name="x">55</property>
+            <property name="y">500</property>
+          </packing>
         </child>
       </object>
     </child>

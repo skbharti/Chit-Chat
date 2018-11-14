@@ -166,6 +166,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <signal name="activate" handler="add_recipient" swapped="no"/>
+            <signal name="pressed" handler="add_recipient" swapped="no"/>
           </object>
           <packing>
             <property name="x">787</property>

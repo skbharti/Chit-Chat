@@ -1,37 +1,15 @@
 import gi
-from run_chat_box import *
-
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 class Handler:
 
-	def user_login(self, button):
+	def user_login():
 		# this gets executed when 'Log Me In!' button in User interface is pressed. 
-
-		##### check if already logged in; if so display message
-
-
-		##### if not open the chat box after authentication
-
-
-		##### authentication
-
-
-		##### open chat box if authentication success
-		builder.add_from_file("interfaces/chat_box.glade")
-		builder.connect_signals(Handler())
-		print("Starting Chat Box GUI")
-		window = builder.get_object("main_window")
-		window.show_all()
-		
-
-	def user_signup(self, button):
-		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
 		pass
 
-	def display_test():
-		# this gets should be used to update textboxes
+	def user_signup():
+		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
 		pass
 
 	def send_message(self, button):
@@ -56,13 +34,14 @@ class Handler:
 		print("Killing GUI")
 		Gtk.main_quit()
 
-builder = Gtk.Builder()
-# chat_box just for testing purpose; replace chat_box with client_interface
-builder.add_from_file("interfaces/client_interface.glade")
-builder.connect_signals(Handler())
-print("Starting Client Interface GUI")
-window = builder.get_object("main_window")
-window.show_all()
+if __name__ == "__main__":
+	builder = Gtk.Builder()
+	# chat_box just for testing purpose; replace chat_box with client_interface
+	builder.add_from_file("interfaces/chat_box.glade")
+	builder.connect_signals(Handler())
+	print("Starting GUI")
+	window = builder.get_object("main_window")
+	window.show_all()
 
-Gtk.main()
+	Gtk.main()
 
