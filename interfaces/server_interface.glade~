@@ -41,7 +41,6 @@
                   <object class="GtkMenu">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <signal name="activate-current" handler="quit_window" swapped="no"/>
                     <child>
                       <object class="GtkImageMenuItem">
                         <property name="label">gtk-quit</property>
@@ -119,7 +118,6 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="start_server" swapped="no"/>
           </object>
           <packing>
             <property name="x">200</property>
@@ -134,7 +132,6 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="stop_server" swapped="no"/>
           </object>
           <packing>
             <property name="x">600</property>

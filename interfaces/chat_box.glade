@@ -114,6 +114,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <signal name="activate" handler="send_message" swapped="no"/>
           </object>
           <packing>
             <property name="x">740</property>
@@ -172,6 +173,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <signal name="activate" handler="add_recipient" swapped="no"/>
           </object>
           <packing>
             <property name="x">787</property>
