@@ -2,7 +2,12 @@ import getpass
 import socket
 import json
 import ast
+import threading
+from time import sleep
+from tkinter import *
 
+
+lock = threading.Lock()
 
 UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
@@ -30,25 +35,54 @@ def client_program():
 		response = authenticate(client_socket)
 
 	print('Authentication Successful Here!')
+	tgui = threading.Thread(target=gui, args=())
+	tgui.daemon = True
+	tgui.start()
 	option = input('========================================================================\n\t\t[1.] Individual Chat [2.] Group Chat [3.] Exit\t\t\n========================================================================\n-> ')
-	if(option == 1):
-		connecting_user = input('User ID: ')
-		message = input('-> ')
-		data = {'TOKEN':'SINGLECHAT', 'USERDATA':{'RECV_ID': connecting_user, 'TEXT':message}}
-		data_json = json.dumps(data)
-		client_socket.send(data_json.encode())
+	if(option == '1'):
+		t = threading.Thread(target=recv_msg, args=(client_socket,))
+		t.daemon = True
+		t.start()
+		while(True):
+			connecting_user = input('User ID: ')
+			message = input('-> ')
+			data = {'TOKEN':'SINGLECHAT', 'USERDATA':{'RECV_ID': connecting_user, 'TEXT':message}}
+			data_json = json.dumps(data)
+			client_socket.send(data_json.encode())
+			sleep(0.1)
 
-	elif(option == 2):
+				
+	if(option == 2):
 		pass
 		# implement group chat here
-	elif(option == 3):
+	if(option == 3):
 		data = {'TOKEN': 'END', 'USERDATA':''}
 		data_json = json.dumps(data)
 		client_socket.send(data_json.encode())
 		client_socket.close()  # close the connection
 	
+def gui():
+	root = Tk()
+	S = Scrollbar(root)
+	T = Text(root, height=30, width=50)
+	S.pack(side=RIGHT, fill=Y)
+	T.pack(side=LEFT, fill=Y)
+	S.config(command=T.yview)
+	T.config(yscrollcommand=S.set)
+	with open(USERID+".txt") as file:
+		data = file.read()
+	T.insert(END, data)
+	mainloop()
 
-	
+
+def recv_msg(client_socket):
+	while(True):
+		data_json = client_socket.recv(1024).decode()
+		token, userdata = parse_json(data_json)
+		lock.acquire()
+		print(userdata)
+		lock.release()
+
 
 def authenticate(client_socket):
 	userid = input("Enter your userid: ")
@@ -78,9 +112,9 @@ def handle_chat(client_socket):
 			print(userdata)
 
 def parse_json(data_json):
-    data = ast.literal_eval(data_json)
-    print(data,type(data))
-    return data['TOKEN'], data['SERVERDATA']
+	data = ast.literal_eval(data_json)
+	# print(data,type(data))
+	return data['TOKEN'], data['SERVERDATA']
 
 
 if __name__ == '__main__':
