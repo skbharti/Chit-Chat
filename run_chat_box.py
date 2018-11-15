@@ -1,3 +1,6 @@
+import threading
+import socket
+import json
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -34,6 +37,13 @@ class Handler:
 		print("Killing GUI")
 		Gtk.main_quit()
 
+
+def recv():
+	while(True):
+		data_json = client_socket.recv(1024).decode()
+		display(data_json)
+
+
 if __name__ == "__main__":
 	builder = Gtk.Builder()
 	# chat_box just for testing purpose; replace chat_box with client_interface
@@ -42,6 +52,10 @@ if __name__ == "__main__":
 	print("Starting GUI")
 	window = builder.get_object("main_window")
 	window.show_all()
+
+	t = threading.Thread(target=recv, args=())
+	t.daemon = True
+	t.start()
 
 	Gtk.main()
 

@@ -4,6 +4,12 @@ from run_chat_box import *
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+import getpass 
+import socket
+import ast
+import threading
+import json
+
 class Handler:
 
 	def user_login(self, button):
@@ -56,6 +62,21 @@ class Handler:
 		print("Killing GUI")
 		Gtk.main_quit()
 
+
+UNSUCCESSFUL = '[UNSUCCESSFUL]'
+PASSWORD = '[PASSWORD]'
+TOO = '[TOO]'
+USERID = ''
+
+host = socket.gethostname()
+file = open("port.txt","r") 
+port = int(file.read())
+print("Port: ",port)
+file.close()
+	
+client_socket = socket.socket()
+client_socket.connect((host, port))
+
 builder = Gtk.Builder()
 # chat_box just for testing purpose; replace chat_box with client_interface
 builder.add_from_file("interfaces/client_interface.glade")
@@ -65,4 +86,3 @@ window = builder.get_object("main_window")
 window.show_all()
 
 Gtk.main()
-
