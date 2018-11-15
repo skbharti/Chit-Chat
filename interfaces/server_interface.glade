@@ -80,6 +80,7 @@
         </child>
         <child>
           <object class="GtkTextView" id="server_main_display_textbox">
+            <property name="name">server_main_display_textbox</property>
             <property name="width_request">920</property>
             <property name="height_request">325</property>
             <property name="visible">True</property>
@@ -120,7 +121,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="start_server" swapped="no"/>
+            <signal name="pressed" handler="start_server" swapped="no"/>
           </object>
           <packing>
             <property name="x">200</property>

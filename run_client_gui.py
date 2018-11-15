@@ -19,11 +19,18 @@ class Handler:
 
 
 		##### if not open the chat box after authentication
+		# userid = builder.get_object('user_id_textbox').get_text()
+		# password = builder.get_object('password_textbox').get_text()
+		# data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
+		# # self.display(data)
+		# data_json = json.dumps(data)
+		# client_socket.send(data_json.encode())
 
-
+		# data_json = client_socket.recv(1024).decode()
+	
+		# token, serverdata = parse_json(data_json)
+		# if(token=='SUCCESS'):
 		##### authentication
-
-
 		##### open chat box if authentication success
 		builder.add_from_file("interfaces/chat_box.glade")
 		builder.connect_signals(Handler())
@@ -36,8 +43,9 @@ class Handler:
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
 		pass
 
-	def display_test():
+	def display(self, data):
 		# this gets should be used to update textboxes
+		print(data)
 		pass
 
 	def send_message(self, button):
@@ -51,10 +59,6 @@ class Handler:
 		
 	def add_recipient(self, button):
 		# this gets executed when 'Add' button  for adding recipient in Chat Box interface is pressed. 
-		pass
-
-	def display_test():
-		# this gets should be used to update textboxes
 		pass
 
 	def quit_window(self, button):
@@ -74,8 +78,8 @@ port = int(file.read())
 print("Port: ",port)
 file.close()
 	
-client_socket = socket.socket()
-client_socket.connect((host, port))
+# client_socket = socket.socket()
+# client_socket.connect((host, port))
 
 builder = Gtk.Builder()
 # chat_box just for testing purpose; replace chat_box with client_interface
