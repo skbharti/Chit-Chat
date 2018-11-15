@@ -93,7 +93,8 @@ class Handler:
 			if(token=='SINGLECHAT'):
 				# msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
 				msg = serverdata['TEXT']
-				self.display(msg)
+				print("here")
+				self.display('from  '+serverdata['SEND_ID']+' : '+msg)
 
 			if(token == 'ADDF'):
 				self.display(serverdata['TEXT'])	
@@ -138,14 +139,11 @@ class Handler:
 				pickle.dump({},handle)
 		print(serverdata)
 		self.display(serverdata['TEXT'])
-		pass
 
 	def display(self, data):
 		# this gets should be used to update textboxes
-		print("Hello")
 		output_text_buffer = builder.get_object('main_display').get_buffer()
-		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
-		output_text_buffer.set_text(output_text+'\n'+data)
+		output_text_buffer.insert_at_cursor('\n'+data)
 
 	def parse_json(self,data_json):
 		data = ast.literal_eval(data_json)

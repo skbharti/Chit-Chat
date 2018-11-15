@@ -123,7 +123,7 @@ class Handler:
 				flag = 0
 				userid = userdata['USERID']
 				password = userdata['PASSWORD']
-				publickey_str = userdata['PUB_KEY']
+				# publickey_str = userdata['PUB_KEY']
 				f = open(serverfile, 'r')
 				for line in f:
 					value = line.split(',')
@@ -139,7 +139,7 @@ class Handler:
 					f = open(serverfile, 'a')
 					f.write(userid+','+password+"\n")
 					f.close()
-					user_publickey[userid] = publickey_str.encode('utf8')
+					# user_publickey[userid] = publickey_str.encode('utf8')
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Signup Successful.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
