@@ -23,7 +23,7 @@ class Handler:
 		password = builder.get_object('password_textbox').get_text()
 		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
 		data = json.dumps(data)
-		self.display(data)
+		# self.display(data)
 		client_socket.send(data.encode())
 
 		data_json = client_socket.recv(1024).decode()
@@ -44,7 +44,7 @@ class Handler:
 	def recv(self):
 		while(True):
 			data_json = client_socket.recv(1024).decode()
-			display(data_json)
+			display_chat(data_json)
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
@@ -58,7 +58,7 @@ class Handler:
 
 	def parse_json(self,data_json):
 		data = ast.literal_eval(data_json)
-		return data['TOKEN'], data['USERDATA']
+		return data['TOKEN'], data['SERVERDATA']
 
 	def send_message(self, button):
 		# this gets executed when 'Send' button in Chat Box interface is pressed.
@@ -72,9 +72,16 @@ class Handler:
 	def add_recipient(self, button):
 		# this gets executed when 'Add' button  for adding recipient in Chat Box interface is pressed. 
 		pass
+	
+	def display_chat():
+		# this gets should be used to update textboxes
+		output_text_buffer = builder.get_object('main_display').get_buffer()
+		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
+		output_text_buffer.set_text(output_text+'\n'+input_text)
+		
+		pass
 
 	def quit_window(self, button):
-		# this gets executed when 'Quit' button in File Menu is pressed. 
 		print("Killing GUI")
 		Gtk.main_quit()
 
