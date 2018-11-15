@@ -56,13 +56,13 @@ class Handler:
 
 
 	def recv(self):
-		print('recieved something')
-		file = './'+self.userid+'.txt'
-		f = open(file, 'r')
-		privatekey_str = f.read()
-		f.close()
-		privatekey_str = privatekey_str.encode('utf8')
-		privatekey = RSA.importKey(privatekey_str)
+		print('recieving something')
+		# file = './'+self.userid+'.txt'
+		# f = open(file, 'r')
+		# privatekey_str = f.read()
+		# f.close()
+		# privatekey_str = privatekey_str.encode('utf8')
+		# privatekey = RSA.importKey(privatekey_str)
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data_json)
