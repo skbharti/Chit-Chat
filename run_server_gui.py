@@ -25,7 +25,6 @@ f.close()
 class Handler:
 	server_socket = socket.socket()
 	def start_server(self,button):
-		print('server starting')
 		host = socket.gethostname()
 		file = open("port.txt","r") 
 		port = int(file.read())+1
@@ -39,9 +38,6 @@ class Handler:
 		
 		self.server_socket.bind((host, port))
 		self.server_socket.listen(5)
-		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
-		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
-		output_text_buffer.set_text(output_text+'\n'+"Server Started")
 		self.display(button,"Server Started")
 
 		ta = threading.Thread(target=self.accept, args=())
@@ -63,7 +59,8 @@ class Handler:
 			t.join()
 
 	def stop_server(self):
-		pass
+		self.server_socket.close()
+		Gtk.main_quit()
 
 	def display(self, button, input_text):
 		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
@@ -126,8 +123,6 @@ class Handler:
 					conn.send(data_json.encode())
 
 			elif(token=='SINGLECHAT'):
-				# reject if user is not online  # threads are to be created to deal with it
-				# accept and send if he is online
 				if(userdata['RECV_ID'] not in user_conn_map.keys()):
 					data = {'TOKEN':'SINGLECHAT', 'SERVERDATA':{'SEND_ID': 'SERVER', 'TEXT':'The user you are looking for is not online.'}}
 					data_json = json.dumps(data)
@@ -138,10 +133,8 @@ class Handler:
 					data_json = json.dumps(data)
 					conn_rec.send(data_json.encode())	
 				pass
-
+			
 			elif(token=='GROUPCHAT'):
-				# reject if no user in the group is online
-				# accept and send to the group users online
 				pass
 
 			elif(token=='END'):
