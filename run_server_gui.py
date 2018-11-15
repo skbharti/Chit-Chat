@@ -163,6 +163,23 @@ class Handler:
 						friends[userid].append(userdata['USERID'])
 						friends[userdata['USERID']].append(userid)
 
+			# elif(token=='SFILE'):
+			# 	if(userdata['RECV_ID'] not in user_conn_map.keys()):
+			# 		data = {'TOKEN':'SFILE', 'SERVERDATA':{'SEND_ID': 'SERVER','RESPONSE': 0 ,'TEXT':'The user you are looking for is not online.'}}
+			# 		data_json = json.dumps(data)
+			# 		conn.send(data_json.encode())
+			# 	else:
+			# 		data = {'TOKEN':'SFILE', 'SERVERDATA':{'SEND_ID': 'SERVER','RESPONSE': 1 ,'TEXT':'Sending File'}}
+			# 		data_json = json.dumps(data)
+			# 		conn.send(data_json.encode())
+
+			# 		conn_rec = user_conn_map[userdata['RECV_ID']]
+			# 		data = {'TOKEN':'RFILE', 'SERVERDATA':{'SEND_ID': userid, 'TEXT':userdata['NAME']}}
+			# 		data_json = json.dumps(data)
+			# 		conn_rec.send(data_json.encode())
+
+					
+
 			elif(token=='END'):
 				break
 

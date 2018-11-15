@@ -114,7 +114,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBox">
+          <object class="GtkComboBox" id="mycombobox">
             <property name="width_request">200</property>
             <property name="height_request">70</property>
             <property name="visible">True</property>

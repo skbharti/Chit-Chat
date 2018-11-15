@@ -3,7 +3,7 @@ from run_chat_box import *
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-
+import os
 import getpass 
 import socket
 import ast
@@ -73,6 +73,44 @@ class Handler:
 		return data['TOKEN'], data['SERVERDATA']
 
 	def send_message(self, button):
+
+		#########
+		# get userid
+		########
+		file = builder.get_object('file_chooser').get_filename()
+		builder.get_object('file_chooser').unselect_all()
+		
+		# if(file!=None):
+		# 	tdata = []
+		# 	with open(file,"rb") as file:
+		# 		while True:
+		# 			dfile = file.read(500)
+		# 			if not dfile:
+		# 				break
+		# 			tdata.append(dfile)
+
+		# 	data = {'TOKEN': 'SFILE', 'USERDATA': {'RECV_ID': userid, 'NAME': os.path.basename(file)}}
+		# 	data = json.dumps(data)
+		# 	client_socket.send(data.encode())
+
+		# 	data_json = client_socket.recv(1024).decode()
+		# 	token, serverdata = self.parse_json(data_json)
+		# 	self.display(serverdata['TEXT'])
+
+		# 	if(serverdata['RESPONSE']==1):
+		# 		i=0
+		# 		while part in tdata:
+		# 			i=i+1
+		# 			data = {'TOKEN': 'PFILE', 'USERDATA': {'RECV_ID': userid, 'NAME': os.path.basename(file),'PART': part}}
+		# 			data = json.dumps(data)
+		# 			client_socket.send(data.encode())
+
+
+
+		# 		data = {'TOKEN': 'FFILE', 'USERDATA': {'RECV_ID': userid, 'NAME': os.path.basename(file)}}
+		# 		data = json.dumps(data)
+		# 		client_socket.send(data.encode())
+
 		# this gets executed when 'Send' button in Chat Box interface is pressed.
 		# replace the code; currently just prints the input text to display
 		input_text_buffer = builder.get_object('message_textbox').get_buffer()
@@ -82,21 +120,15 @@ class Handler:
 		output_text_buffer.set_text(output_text+'\n'+input_text)
 		
 	def add_recipient(self, button):
-		print("a")
-		input_text = builder.get_object('add_recipient_textbox').get_text()
-		print("a")
-		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
-		print("a")
-		data = json.dumps(data)
-		print("a")
-		client_socket.send(data.encode())
-		print("a")
-		data_json = client_socket.recv(1024).decode()
-		print("a")
-		token, serverdata = self.parse_json(data_json)
-		print("a")
-		self.display(serverdata)
-		print("a")
+		# input_text = builder.get_object('add_recipient_textbox').get_text()
+		# data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
+		# data = json.dumps(data)
+		# client_socket.send(data.encode())
+		# data_json = client_socket.recv(1024).decode()
+		# token, serverdata = self.parse_json(data_json)
+		# self.display(serverdata)
+		# list1 = ['abc']
+		# builder.get_object('recipient_dropdown').addItems(list1)
 		####################
 		# add to list
 		####################
