@@ -8,6 +8,10 @@ import json
 import ast
 import threading
 import json
+import Crypto
+from Crypto.PublicKey import RSA
+from Crypto import Random
+
 
 UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
@@ -17,8 +21,9 @@ users = {'a':'a','b':'b'}
 user_port_map = {}
 user_conn_map = {}
 friends = {}
+user_publickey = {}
 
-serverfile = './serverfile.txt'
+serverfile = './serverfile.csv'
 f = open(serverfile,'a')
 f.close()
 
@@ -105,6 +110,7 @@ class Handler:
 				flag = 0
 				userid = userdata['USERID']
 				password = userdata['PASSWORD']
+				publickey_str = userdata['PUB_KEY']
 				f = open(serverfile, 'r')
 				for line in f:
 					value = line.split(',')
@@ -120,6 +126,7 @@ class Handler:
 					f = open(serverfile, 'a')
 					f.write(userid+','+password+"\n")
 					f.close()
+					user_publickey[userid] = publickey_str
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Signup Successful.'}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
@@ -142,7 +149,7 @@ class Handler:
 
 			elif(token=='ADD'):
 				if(userdata['USERID'] not in user_conn_map.keys()):
-					data = {'TOKEN':'ADDRES', 'SERVERDATA':'The user you are looking for is not online.'}
+					data = {'TOKEN':'ADDF', 'SERVERDATA':'The user you are looking for is not online.'}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
@@ -153,13 +160,16 @@ class Handler:
 					data_json = conn_rec.recv(1024).decode()
 					token,response = self.parse_json(data_json)
 					if(response=='0'):
-						data = {'TOKEN': 'ADDRES', 'SERVERDATA': 'The user you are looking rejected chat request'}
+						data = {'TOKEN': 'ADDF', 'SERVERDATA': 'The user you are looking rejected chat request'}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
 					else:
-						data = {'TOKEN': 'ADDRES', 'SERVERDATA': 'The user added you'}
+						data = {'TOKEN': 'ADDS', 'SERVERDATA': 'The user added you', 'PUB_KEY': user_publickey[userdata['USERID']]}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
+						data = {'TOKEN': 'ADDS', 'PUB_KEY': user_publickey[userid], 'SERVERDATA': 'Public Key delivered'}
+						data_json = json.dumps(data)
+						conn_rec.send(data_json.encode())
 						friends[userid].append(userdata['USERID'])
 						friends[userdata['USERID']].append(userid)
 
