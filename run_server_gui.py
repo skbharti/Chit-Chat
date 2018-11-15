@@ -24,8 +24,14 @@ f.close()
 
 
 class Handler:
-	server_socket = socket.socket()
+	server_socket = 0
+	state = 0
 	def start_server(self,button):
+		if(self.state):
+			self.display("Server already Online.")
+			return
+
+		self.server_socket = socket.socket()
 		host = socket.gethostname()
 		file = open("port.txt","r") 
 		port = int(file.read())+1
@@ -35,12 +41,11 @@ class Handler:
 		file = open("port.txt","w") 
 		file.write(str(port))
 		file.close()
-
 		
 		self.server_socket.bind((host, port))
 		self.server_socket.listen(5)
-		self.display(button,"Server Started")
-
+		self.display("Server Started")
+		self.state = 1
 		ta = threading.Thread(target=self.accept, args=())
 		ta.daemon = True
 		ta.start()
@@ -59,11 +64,15 @@ class Handler:
 		for t in threads:
 			t.join()
 
-	def stop_server(self):
-		self.server_socket.close()
-		Gtk.main_quit()
+	def stop_server(self,button):
+		if(self.state == 1):
+			self.server_socket.close()
+			self.display("Server Stopped.")
+			self.state = 0
+		else:
+			self.display("Server already Offline.")
 
-	def display(self, button, input_text):
+	def display(self, input_text):
 		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+input_text)
