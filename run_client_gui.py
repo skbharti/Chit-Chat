@@ -96,12 +96,25 @@ class Handler:
 		return data['TOKEN'], data['SERVERDATA']
 
 	def send_message(self, button):
+		combo = builder.get_object('recipient_dropdown')
+		tree_iter = combo.get_active_iter()
+		if tree_iter is not None:
+			model = combo.get_model()
+			row_id, recvid = model[tree_iter][:2]
+		print(recvid)
 
-		#########
-		# get userid
-		########
-		file = builder.get_object('file_chooser').get_filename()
-		builder.get_object('file_chooser').unselect_all()
+		input_text_buffer = builder.get_object('message_textbox').get_buffer()
+		output_text_buffer = builder.get_object('main_display').get_buffer()
+		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
+		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
+		output_text_buffer.set_text(output_text+'\n'+input_text)
+
+		data = {'TOKEN': 'SINGLECHAT', 'USERDATA': {'RECV_ID': recvid, 'TEXT': output_text}}
+		data = json.dumps(data)
+		client_socket.send(data.encode())
+
+		# file = builder.get_object('file_chooser').get_filename()
+		# builder.get_object('file_chooser').unselect_all()
 		
 		# if(file!=None):
 		# 	tdata = []
@@ -136,11 +149,6 @@ class Handler:
 
 		# this gets executed when 'Send' button in Chat Box interface is pressed.
 		# replace the code; currently just prints the input text to display
-		input_text_buffer = builder.get_object('message_textbox').get_buffer()
-		output_text_buffer = builder.get_object('main_display').get_buffer()
-		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
-		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
-		output_text_buffer.set_text(output_text+'\n'+input_text)
 
 
 		
