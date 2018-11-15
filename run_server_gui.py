@@ -17,6 +17,10 @@ users = {'a':'a','b':'b'}
 user_port_map = {}
 user_conn_map = {}
 
+serverfile = './serverfile.txt'
+f = open(serverfile,'a')
+f.close()
+
 
 class Handler:
 	server_socket = socket.socket()
@@ -95,6 +99,29 @@ class Handler:
 					conn.send(data_json.encode())
 				else:
 					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA': 'Authentication Unsuccessful'}
+					data_json = json.dumps(data)
+					conn.send(data_json.encode())
+
+			elif(token=='SIGNUP'):
+				flag = 0
+				userid = userdata['USERID']
+				password = userdata['PASSWORD']
+				f = open(serverfile, 'r')
+				for line in f:
+					value = line.split(',')
+					if(value[0]==userid):
+						flag = 1
+						break
+				f.close()
+				if(flag==1):
+					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA': 'Signup Unsuccessful, username already exists.'}
+					data_json = json.dumps(data)
+					conn.send(data_json.encode())
+				else:
+					f = open(serverfile, 'a')
+					f.write(userid+','+password+"\n")
+					f.close()
+					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Signup Successful.'}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 

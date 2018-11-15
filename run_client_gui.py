@@ -23,7 +23,7 @@ class Handler:
 		password = builder.get_object('password_textbox').get_text()
 		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
 		data = json.dumps(data)
-		self.display(data)
+		# self.display(data)
 		client_socket.send(data.encode())
 
 		data_json = client_socket.recv(1024).decode()
@@ -44,21 +44,33 @@ class Handler:
 	def recv(self):
 		while(True):
 			data_json = client_socket.recv(1024).decode()
-			display(data_json)
+			token, serverdata = self.parse_json(data)
+			self.display(serverdata)
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
+		userid = builder.get_object('user_id_textbox').get_text()
+		password = builder.get_object('password_textbox').get_text()
+		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
+		data = json.dumps(data)
+		client_socket.send(data.encode())
+
+		data_json = client_socket.recv(1024).decode()
+	
+		token, serverdata = self.parse_json(data_json)
+		
+		self.display(serverdata)
 		pass
 
 	def display(self, data):
 		# this gets should be used to update textboxes
-		token, serverdata = self.parse_json(data)
+		# token, serverdata = self.parse_json(data)
 		output_text_buffer = builder.get_object('main_display').get_buffer()
-		output_text_buffer.set_text(token)
+		output_text_buffer.set_text(data)
 
 	def parse_json(self,data_json):
 		data = ast.literal_eval(data_json)
-		return data['TOKEN'], data['USERDATA']
+		return data['TOKEN'], data['SERVERDATA']
 
 	def send_message(self, button):
 		# this gets executed when 'Send' button in Chat Box interface is pressed.
