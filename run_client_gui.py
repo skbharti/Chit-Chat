@@ -19,24 +19,22 @@ class Handler:
 
 
 		##### if not open the chat box after authentication
-		# userid = builder.get_object('user_id_textbox').get_text()
-		# password = builder.get_object('password_textbox').get_text()
-		# data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
-		# # self.display(data)
-		# data_json = json.dumps(data)
-		# client_socket.send(data_json.encode())
+		userid = builder.get_object('user_id_textbox').get_text()
+		password = builder.get_object('password_textbox').get_text()
+		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
+		data = json.dumps(data)
+		self.display(data)
+		client_socket.send(data.encode())
 
-		# data_json = client_socket.recv(1024).decode()
+		data_json = client_socket.recv(1024).decode()
 	
-		# token, serverdata = parse_json(data_json)
-		# if(token=='SUCCESS'):
-		##### authentication
-		##### open chat box if authentication success
-		builder.add_from_file("interfaces/chat_box.glade")
-		builder.connect_signals(Handler())
-		print("Starting Chat Box GUI")
-		window = builder.get_object("main_window")
-		window.show_all()
+		token, serverdata = parse_json(data_json)
+		if(token=='SUCCESS'):
+			builder.add_from_file("interfaces/chat_box.glade")
+			builder.connect_signals(Handler())
+			print("Starting Chat Box GUI")
+			window = builder.get_object("main_window")
+			window.show_all()
 		
 
 	def user_signup(self, button):
@@ -45,9 +43,14 @@ class Handler:
 
 	def display(self, data):
 		# this gets should be used to update textboxes
+		token, serverdata = self.parse_json(data)
 		output_text_buffer = builder.get_object('main_display').get_buffer()
-		output_text_buffer.set_text(data)
+		output_text_buffer.set_text(token)
 		pass
+
+	def parse_json(self,data_json):
+		data = ast.literal_eval(data_json)
+		return data['TOKEN'], data['USERDATA']
 
 	def send_message(self, button):
 		# this gets executed when 'Send' button in Chat Box interface is pressed.
@@ -79,8 +82,8 @@ port = int(file.read())
 print("Port: ",port)
 file.close()
 	
-# client_socket = socket.socket()
-# client_socket.connect((host, port))
+client_socket = socket.socket()
+client_socket.connect((host, port))
 
 builder = Gtk.Builder()
 # chat_box just for testing purpose; replace chat_box with client_interface
