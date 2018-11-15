@@ -46,6 +46,8 @@ class Handler:
 			t = threading.Thread(target=self.recv, args=())
 			t.daemon = True
 			t.start()
+		else:
+			self.display(serverdata['TEXT'])	
 
 		
 	def recv(self):
@@ -57,8 +59,35 @@ class Handler:
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data)
-			msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
-			self.display(msg)
+			if(token=='POPUP'):
+				builder.add_from_file("interfaces/connect_request.glade")
+				builder.connect_signals(Handler())
+				print("Starting Client Interface GUI")
+				window3 = builder.get_object("main_window")
+				window3.show_all()
+
+			if(token == 'ADDS'):
+				friend_publickey[serverdata['USER_ID']] = serverdata['PUB_KEY']
+				self.display(serverdata['TEXT'])
+			
+			if(token=='SINGLECHAT'):
+				msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
+				self.display(msg)
+
+			if(token == 'ADDF'):
+				self.display(serverdata['TEXT'])	
+
+	def accept_request(self, button):
+		data = {'TOKEN': 'ADDS', 'RESPONSE': '1'}
+		data_json = json.dumps(data)
+		client_socket.send(data_json)
+
+	def reject_request(self, button):
+		data = {'TOKEN': 'ADDF', 'RESPONSE': '0'}
+		data_json = json.dumps(data)
+		client_socket.send(data_json)
+			
+
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
@@ -81,7 +110,7 @@ class Handler:
 			f.write(privatekey_str)
 			f.close()
 		print(serverdata)
-		self.display(serverdata)
+		self.display(serverdata['TEXT'])
 		pass
 
 	def display(self, data):
@@ -148,11 +177,6 @@ class Handler:
 		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
-		data_json = client_socket.recv(1024).decode()
-		token, serverdata = self.parse_json(data_json)
-		self.display(serverdata)
-		if(token == 'ADDS'):
-			friend_publickey[input_text] = serverdata['PUB_KEY']
 		####################
 		# add to list
 		####################

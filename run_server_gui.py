@@ -97,11 +97,11 @@ class Handler:
 				userid = userdata['USERID']
 				response = self.authenticate(userdata, addr, conn)
 				if(response==1):
-					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Authentication Successful'}
+					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Authentication Successful'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
-					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA': 'Authentication Unsuccessful'}
+					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA':{'TEXT': 'Authentication Unsuccessful'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 
@@ -119,7 +119,7 @@ class Handler:
 						break
 				f.close()
 				if(flag==1):
-					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA': 'Signup Unsuccessful, username already exists.'}
+					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA':{'TEXT': 'Signup Unsuccessful, username already exists.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
@@ -127,7 +127,7 @@ class Handler:
 					f.write(userid+','+password+"\n")
 					f.close()
 					user_publickey[userid] = publickey_str
-					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Signup Successful.'}
+					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Signup Successful.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 					friends[userid] = []
@@ -149,7 +149,7 @@ class Handler:
 
 			elif(token=='ADD'):
 				if(userdata['USERID'] not in user_conn_map.keys()):
-					data = {'TOKEN':'ADDF', 'SERVERDATA':'The user you are looking for is not online.'}
+					data = {'TOKEN':'ADDF', 'SERVERDATA': {'TEXT': 'The user you are looking for is not online.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
@@ -160,14 +160,14 @@ class Handler:
 					data_json = conn_rec.recv(1024).decode()
 					token,response = self.parse_json(data_json)
 					if(response=='0'):
-						data = {'TOKEN': 'ADDF', 'SERVERDATA': 'The user you are looking rejected chat request'}
+						data = {'TOKEN': 'ADDF', 'SERVERDATA': {'TEXT': 'The user you are looking rejected chat request'}}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
 					else:
-						data = {'TOKEN': 'ADDS', 'SERVERDATA': 'The user added you', 'PUB_KEY': user_publickey[userdata['USERID']]}
+						data = {'TOKEN': 'ADDS', 'SERVERDATA':{'TEXT': 'The user added you', 'PUB_KEY': user_publickey[userdata['USERID']], 'USER_ID': userdata['USERID']}}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
-						data = {'TOKEN': 'ADDS', 'PUB_KEY': user_publickey[userid], 'SERVERDATA': 'Public Key delivered'}
+						data = {'TOKEN': 'ADDS', 'SERVERDATA': {'PUB_KEY': user_publickey[userid], 'TEXT': 'Public Key delivered', 'USER_ID': userid}}
 						data_json = json.dumps(data)
 						conn_rec.send(data_json.encode())
 						friends[userid].append(userdata['USERID'])
