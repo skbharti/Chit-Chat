@@ -19,7 +19,8 @@ user_conn_map = {}
 
 class Handler:
 
-	def start_server():
+	def start_server(self,button):
+		print('server starting')
 		host = socket.gethostname()
 		file = open("port.txt","r") 
 		port = int(file.read())+1
@@ -47,7 +48,7 @@ class Handler:
 		for t in threads:
 			t.join()
 
-	def stop_server():
+	def stop_server(self):
 		
 		pass
 
@@ -57,12 +58,12 @@ class Handler:
 		output_text_buffer.set_text(output_text+'\n'+input_text)
 
 
-	def quit_window():
+	def quit_window(self):
 		# this gets executed when 'Quit' button in File Menu is pressed. 
 		print("Killing GUI")
 		Gtk.main_quit()
 
-	def authenticate(data,addr,conn):
+	def authenticate(self,data,addr,conn):
 		userid = data['USERID']
 		password = data['PASSWORD']
 		user_port_map[userid] = addr[1]
@@ -75,43 +76,43 @@ class Handler:
 
 
 #########################################################
-def client():
-	while(True):
-		data_json = conn.recv(1024).decode()
-		token, userdata = parse_json(data_json)
-		if(token=='AUTH'):
-			userid = userdata['USERID']
-			response = authenticate(userdata, addr, conn)
-			if(response==1):
-				data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Authentication Successful'}
-				data_json = json.dumps(data)
-				conn.send(data_json.encode())
-			else:
-				data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA': 'Authentication Unsuccessful'}
-				data_json = json.dumps(data)
-				conn.send(data_json.encode())
+	def client(self):
+		while(True):
+			data_json = conn.recv(1024).decode()
+			token, userdata = parse_json(data_json)
+			if(token=='AUTH'):
+				userid = userdata['USERID']
+				response = authenticate(userdata, addr, conn)
+				if(response==1):
+					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Authentication Successful'}
+					data_json = json.dumps(data)
+					conn.send(data_json.encode())
+				else:
+					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA': 'Authentication Unsuccessful'}
+					data_json = json.dumps(data)
+					conn.send(data_json.encode())
 
-		elif(token=='SINGLECHAT'):
-			# reject if user is not online  # threads are to be created to deal with it
-			# accept and send if he is online
-			if(userdata['RECV_ID'] not in user_conn_map.keys()):
-				data = {'TOKEN':'SINGLECHAT', 'SERVERDATA':{'SEND_ID': 'SERVER', 'TEXT':'The user you are looking for is not online.'}}
-				data_json = json.dumps(data)
-				conn.send(data_json.encode())
-			else:
-				conn_rec = user_conn_map[userdata['RECV_ID']]
-				data = {'TOKEN':'SINGLECHAT', 'SERVERDATA':{'SEND_ID': userid, 'TEXT':userdata['TEXT']}}
-				data_json = json.dumps(data)
-				conn_rec.send(data_json.encode())	
-			pass
+			elif(token=='SINGLECHAT'):
+				# reject if user is not online  # threads are to be created to deal with it
+				# accept and send if he is online
+				if(userdata['RECV_ID'] not in user_conn_map.keys()):
+					data = {'TOKEN':'SINGLECHAT', 'SERVERDATA':{'SEND_ID': 'SERVER', 'TEXT':'The user you are looking for is not online.'}}
+					data_json = json.dumps(data)
+					conn.send(data_json.encode())
+				else:
+					conn_rec = user_conn_map[userdata['RECV_ID']]
+					data = {'TOKEN':'SINGLECHAT', 'SERVERDATA':{'SEND_ID': userid, 'TEXT':userdata['TEXT']}}
+					data_json = json.dumps(data)
+					conn_rec.send(data_json.encode())	
+				pass
 
-		elif(token=='GROUPCHAT'):
-			# reject if no user in the group is online
-			# accept and send to the group users online
-			pass
+			elif(token=='GROUPCHAT'):
+				# reject if no user in the group is online
+				# accept and send to the group users online
+				pass
 
-		elif(token=='END'):
-			break
+			elif(token=='END'):
+				break
 ########################################################
 
 def accept():
@@ -141,5 +142,5 @@ builder.connect_signals(Handler())
 print("Starting Server Interface GUI")
 window = builder.get_object("main_window")
 window.show_all()
-
+print("abc")
 Gtk.main()
