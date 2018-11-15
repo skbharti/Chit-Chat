@@ -33,12 +33,25 @@ class Handler:
 		server_socket = socket.socket()
 		server_socket.bind((host, port))
 		server_socket.listen(5)
+		self.display("Server Started")
+
+		threads = []
+		while(True):
+			print('Waiting for Connections')
+			conn, addr = server_socket.accept()
+			print("Connection from: " + str(addr))
+			t = threading.Thread(target=self.client, args=(conn,addr,))
+			threads.append(t)
+			t.daemon = True
+			t.start()
+		for t in threads:
+			t.join()
 
 	def stop_server():
-		# this gets executed when 'Stop Server' button in Server interface is pressed. 
+		
 		pass
 
-	def display(self, button):
+	def display(self, input_text):
 		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+input_text)
@@ -118,9 +131,7 @@ def accept():
 
 
 
-ta = threading.Thread(target=accept,args=())
-ta.daemon = True
-ta.start()
+
 
 
 
