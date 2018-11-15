@@ -45,7 +45,8 @@ class Handler:
 
 	def display(self, data):
 		# this gets should be used to update textboxes
-		print(data)
+		output_text_buffer = builder.get_object('main_display').get_buffer()
+		output_text_buffer.set_text(data)
 		pass
 
 	def send_message(self, button):

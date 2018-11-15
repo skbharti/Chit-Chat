@@ -177,7 +177,8 @@
           </object>
         </child>
         <child>
-          <object class="GtkTextView">
+          <object class="GtkTextView" id="main_display">
+            <property name="name">main_display</property>
             <property name="width_request">850</property>
             <property name="height_request">80</property>
             <property name="visible">True</property>
