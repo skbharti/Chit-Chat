@@ -177,10 +177,12 @@ class Handler:
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
 					else:
-						data = {'TOKEN': 'ADDS', 'SERVERDATA':{'TEXT': 'The user added you', 'PUB_KEY': user_publickey[userdata['USERID']], 'USER_ID': userdata['USERID']}}
+						data = {'TOKEN': 'ADDS', 'SERVERDATA':{'TEXT': 'The user added you', 'USER_ID': userdata['USERID']}}
+
+						# data = {'TOKEN': 'ADDS', 'SERVERDATA':{'TEXT': 'The user added you', 'PUB_KEY': user_publickey[userdata['USERID']], 'USER_ID': userdata['USERID']}}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
-						data = {'TOKEN': 'ADDS', 'SERVERDATA': {'PUB_KEY': user_publickey[userid], 'TEXT': 'Public Key delivered', 'USER_ID': userid}}
+						data = {'TOKEN': 'ADDS', 'SERVERDATA': {'TEXT': 'Public Key delivered', 'USER_ID': userid}}
 						data_json = json.dumps(data)
 						conn_rec.send(data_json.encode())
 						friends[userid].append(userdata['USERID'])
