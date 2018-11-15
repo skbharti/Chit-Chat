@@ -49,11 +49,16 @@ class Handler:
 
 		
 	def recv(self):
+		file = './'+userid+'.txt'
+		f = open(file, 'r')
+		privatekey_str = f.read()
+		f.close()
+		privatekey = privatekey_str.importKey()
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data)
-
-			self.display(serverdata['TEXT'])
+			msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
+			self.display(msg)
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
@@ -97,6 +102,8 @@ class Handler:
 		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+input_text)
+
+
 		
 	def add_recipient(self, button):
 		input_text = builder.get_object('add_recipient_textbox').get_text()
