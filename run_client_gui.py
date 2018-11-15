@@ -28,14 +28,23 @@ class Handler:
 
 		data_json = client_socket.recv(1024).decode()
 	
-		token, serverdata = parse_json(data_json)
+		token, serverdata = self.parse_json(data_json)
 		if(token=='SUCCESS'):
 			builder.add_from_file("interfaces/chat_box.glade")
 			builder.connect_signals(Handler())
 			print("Starting Chat Box GUI")
 			window = builder.get_object("main_window")
 			window.show_all()
+			
+			t = threading.Thread(target=self.recv, args=())
+			t.daemon = True
+			t.start()
+
 		
+	def recv(self):
+		while(True):
+			data_json = client_socket.recv(1024).decode()
+			display(data_json)
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
@@ -46,7 +55,6 @@ class Handler:
 		token, serverdata = self.parse_json(data)
 		output_text_buffer = builder.get_object('main_display').get_buffer()
 		output_text_buffer.set_text(token)
-		pass
 
 	def parse_json(self,data_json):
 		data = ast.literal_eval(data_json)

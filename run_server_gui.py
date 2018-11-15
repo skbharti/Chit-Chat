@@ -19,7 +19,7 @@ user_conn_map = {}
 
 
 class Handler:
-
+	server_socket = socket.socket()
 	def start_server(self,button):
 		print('server starting')
 		host = socket.gethostname()
@@ -32,18 +32,24 @@ class Handler:
 		file.write(str(port))
 		file.close()
 
-		server_socket = socket.socket()
-		server_socket.bind((host, port))
-		server_socket.listen(5)
+		
+		self.server_socket.bind((host, port))
+		self.server_socket.listen(5)
 		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+"Server Started")
 		self.display(button,"Server Started")
 
+		ta = threading.Thread(target=self.accept, args=())
+		ta.daemon = True
+		ta.start()
+
+		
+	def accept(self):
 		threads = []
 		while(True):
 			print('Waiting for Connections')
-			conn, addr = server_socket.accept()
+			conn, addr = self.server_socket.accept()
 			print("Connection from: " + str(addr))
 			t = threading.Thread(target=self.client, args=(conn,addr,))
 			threads.append(t)
@@ -76,16 +82,13 @@ class Handler:
 				return 1
 		return 0	
 
-
-
-#########################################################
-	def client(self):
+	def client(self,conn,addr):
 		while(True):
 			data_json = conn.recv(1024).decode()
-			token, userdata = parse_json(data_json)
+			token, userdata = self.parse_json(data_json)
 			if(token=='AUTH'):
 				userid = userdata['USERID']
-				response = authenticate(userdata, addr, conn)
+				response = self.authenticate(userdata, addr, conn)
 				if(response==1):
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Authentication Successful'}
 					data_json = json.dumps(data)
@@ -116,7 +119,11 @@ class Handler:
 
 			elif(token=='END'):
 				break
-########################################################
+
+	def parse_json(self,data_json):
+		data = ast.literal_eval(data_json)
+		return data['TOKEN'], data['USERDATA']
+
 
 def accept():
 	threads = []
