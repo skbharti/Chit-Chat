@@ -49,6 +49,16 @@ class Handler:
 		print("Killing GUI")
 		Gtk.main_quit()
 
+	def authenticate(data,addr,conn):
+		userid = data['USERID']
+		password = data['PASSWORD']
+		user_port_map[userid] = addr[1]
+		user_conn_map[userid] = conn
+		if(userid in users.keys()):
+			if(password == users[userid]):
+				return 1
+		return 0	
+
 
 
 #########################################################
