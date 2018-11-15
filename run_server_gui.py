@@ -48,7 +48,6 @@ class Handler:
 			t.join()
 
 	def stop_server():
-		
 		pass
 
 	def display(self, input_text):
