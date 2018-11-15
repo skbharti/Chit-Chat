@@ -1,5 +1,4 @@
 import gi
-from run_chat_box import *
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -56,13 +55,6 @@ class Handler:
 
 
 	def recv(self):
-		print('recieving something')
-		# file = './'+self.userid+'.txt'
-		# f = open(file, 'r')
-		# privatekey_str = f.read()
-		# f.close()
-		# privatekey_str = privatekey_str.encode('utf8')
-		# privatekey = RSA.importKey(privatekey_str)
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data_json)
@@ -96,6 +88,11 @@ class Handler:
 				print("here")
 				self.display('from  '+serverdata['SEND_ID']+' : '+msg)
 
+			if(token=='BROADCAST'):
+				# msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
+				msg = serverdata['TEXT']
+				self.display('broadcast from  '+serverdata['SEND_ID']+' : '+msg)
+
 			if(token == 'ADDF'):
 				self.display(serverdata['TEXT'])	
 
@@ -113,11 +110,6 @@ class Handler:
 
 
 	def user_signup(self, button):
-		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
-		# random_generator = Random.new().read
-		# key = RSA.generate(1024, random_generator)
-		# publickey_str = key.publickey().exportKey() # pub key export for exchange
-		# privatekey_str = key.exportKey()
 		self.userid = builder.get_object('user_id_textbox').get_text()
 		password = builder.get_object('password_textbox').get_text()
 		# data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password, 'PUB_KEY': publickey_str.decode('utf8')}}
@@ -157,73 +149,24 @@ class Handler:
 			row_id, recvid = model[tree_iter][:2]
 		print(recvid)
 
+
 		input_text_buffer = builder.get_object('message_textbox').get_buffer()
-		# output_text_buffer = builder.get_object('main_display').get_buffer()
 		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
-		# output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
-		# output_text_buffer.set_text(output_text+'\n'+input_text)
-		# pubk = RSA.importKey(friend_publickey[recvid])
-		# output_text = pubk.encrypt(output_text.encode('utf-8'), 32)
-		data = {'TOKEN': 'SINGLECHAT', 'USERDATA': {'RECV_ID': recvid, 'TEXT': input_text}}
+		print("broadcasting")
+		if(recvid=='broadcast'):
+			data = {'TOKEN': 'BROADCAST', 'USERDATA': {'RECV_ID': recvid, 'TEXT': input_text}}
+		else:
+			data = {'TOKEN': 'SINGLECHAT', 'USERDATA': {'RECV_ID': recvid, 'TEXT': input_text}}
+		
 		data = json.dumps(data)
 		input_text_buffer.set_text('')
 		client_socket.send(data.encode())
-
-		# file = builder.get_object('file_chooser').get_filename()
-		# builder.get_object('file_chooser').unselect_all()
-		
-		# if(file!=None):
-		# 	tdata = []
-		# 	with open(file,"rb") as file:
-		# 		while True:
-		# 			dfile = file.read(500)
-		# 			if not dfile:
-		# 				break
-		# 			tdata.append(dfile)
-
-		# 	data = {'TOKEN': 'SFILE', 'USERDATA': {'RECV_ID': userid, 'NAME': os.path.basename(file)}}
-		# 	data = json.dumps(data)
-		# 	client_socket.send(data.encode())
-
-		# 	data_json = client_socket.recv(1024).decode()
-		# 	token, serverdata = self.parse_json(data_json)
-		# 	self.display(serverdata['TEXT'])
-
-		# 	if(serverdata['RESPONSE']==1):
-		# 		i=0
-		# 		while part in tdata:
-		# 			i=i+1
-		# 			data = {'TOKEN': 'PFILE', 'USERDATA': {'RECV_ID': userid, 'NAME': os.path.basename(file),'PART': part}}
-		# 			data = json.dumps(data)
-		# 			client_socket.send(data.encode())
-
-
-
-		# 		data = {'TOKEN': 'FFILE', 'USERDATA': {'RECV_ID': userid, 'NAME': os.path.basename(file)}}
-		# 		data = json.dumps(data)
-		# 		client_socket.send(data.encode())
-
-		# this gets executed when 'Send' button in Chat Box interface is pressed.
-		# replace the code; currently just prints the input text to display
-
-
 		
 	def add_recipient(self, button):
 		input_text = builder.get_object('add_recipient_textbox').get_text()
 		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
-		
-		# combobox = builder.get_object('recipient_dropdown')
-		# store = Gtk.ListStore(int,str)
-		# store.append([i, fid])
-
-
-		####################
-		# add to list
-		####################
-
-		print("added")
 		
 	
 	def display_chat(self,data):
@@ -232,8 +175,6 @@ class Handler:
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+input_text)
 		
-		pass
-
 	def quit_window(self, button):
 		print("Killing GUI")
 		# with open(self.userid+".pkl", "wb") as handle:
@@ -251,17 +192,13 @@ class Handler:
 			print("Entered: %s" % entry.get_text())
 
 	def add_recipients(self):
-		recipient_list = {'aa':'123','bb':'123','cc':'123','dd':'123'}
+		recipient_list = {'aa':'123','bb':'123','cc':'123','dd':'123','broadcast':'123'}
 		pickle.dump(recipient_list, open(self.userid+'.pkl', 'wb'))
 		combobox = builder.get_object('recipient_dropdown')
 		store = Gtk.ListStore(int,str)
 		with open(self.userid+".pkl", "rb")as handle:
 			friend_publickey = pickle.load(handle)
 
-		# put the code for actual list of recipients
-		# store.append ([1, "SKB"])
-		# store.append ([2, "AMS"])
-		# store.append ([3, "GSP"])
 		i=1
 		for fid in friend_publickey.keys():
 			store.append([i, fid])

@@ -156,7 +156,14 @@ class Handler:
 					data_json = json.dumps(data)
 					conn_rec.send(data_json.encode())	
 				pass
-			
+
+			elif(token=='BROADCAST'):
+				for um in user_conn_map.keys():
+					conn_rec = user_conn_map[um]
+					data = {'TOKEN':'BROADCAST', 'SERVERDATA':{'SEND_ID': userid, 'TEXT':userdata['TEXT']}}
+					data_json = json.dumps(data)
+					conn_rec.send(data_json.encode())	
+				
 			elif(token=='GROUPCHAT'):
 				pass
 
