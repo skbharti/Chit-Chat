@@ -57,6 +57,7 @@ class Handler:
 		f = open(file, 'r')
 		privatekey_str = f.read()
 		f.close()
+		privatekey_str = privatekey_str.encode('utf8')
 		privatekey = privatekey_str.importKey()
 		while(True):
 			data_json = client_socket.recv(1024).decode()
@@ -120,12 +121,13 @@ class Handler:
 		data_json = client_socket.recv(1024).decode()
 	
 		token, serverdata = self.parse_json(data_json)
-		if(token=='SUCESS'):
+		if(token=='SUCCESS'):
+			print("HAHAHA")
 			file = './'+self.userid+'.txt'
 			f = open(file, 'w')
-			f.write(privatekey_str)
+			f.write(privatekey_str.decode('utf8'))
 			f.close()
-			with open(self.userid+".pkl", "wb") as handle:
+			with open("./"+self.userid+".pkl", "wb") as handle:
 				pickle.dump({},handle)
 		print(serverdata)
 		self.display(serverdata['TEXT'])

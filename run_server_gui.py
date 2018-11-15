@@ -80,12 +80,12 @@ class Handler:
 		user_port_map[userid] = addr[1]
 		user_conn_map[userid] = conn
 		f = open(serverfile, 'r')
-		print("opened")
-		print(userid)
-		print(password)
+		# print("opened")
+		# print(userid)
+		# print(password)
 		for line in f:
 			value = line.split(',')
-			print(value[0], value[1])
+			# print(value[0], value[1])
 			if(value[0]==userid):
 				if(password==value[1][:-1]):
 					f.close()
