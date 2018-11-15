@@ -12,9 +12,9 @@ import json
 import Crypto
 from Crypto.PublicKey import RSA
 from Crypto import Random
+import pickle
 
 friend_publickey = {}
-
 
 class Handler:
 	userid = ''
@@ -42,6 +42,8 @@ class Handler:
 			print("Starting Chat Box GUI")
 			window2 = builder.get_object("main_window")
 			window2.show_all()
+
+			self.add_recipients()
 			
 			t = threading.Thread(target=self.recv, args=())
 			t.daemon = True
@@ -51,7 +53,6 @@ class Handler:
 
 		
 	def recv(self):
-		self.add_recipients()
 		file = './'+self.userid+'.txt'
 		f = open(file, 'r')
 		privatekey_str = f.read()
@@ -70,6 +71,19 @@ class Handler:
 			if(token == 'ADDS'):
 				friend_publickey[serverdata['USER_ID']] = serverdata['PUB_KEY']
 				self.display(serverdata['TEXT'])
+
+				combobox = builder.get_object('recipient_dropdown')
+				store = Gtk.ListStore(int,str)
+				store.append([len(friend_publickey), serverdata['USER_ID']])
+				combobox.connect('changed',self.recipient_changed)
+				combobox.set_entry_text_column(1)
+				cell = Gtk.CellRendererText()
+				combobox.pack_start(cell,True)
+				combobox.add_attribute(cell, 'text', 0)
+				combobox.set_model(store)
+				combobox.set_active(0)
+
+
 			
 			if(token=='SINGLECHAT'):
 				msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
@@ -82,6 +96,7 @@ class Handler:
 		data = {'TOKEN': 'ADDS', 'RESPONSE': '1'}
 		data_json = json.dumps(data)
 		client_socket.send(data_json)
+
 
 	def reject_request(self, button):
 		data = {'TOKEN': 'ADDF', 'RESPONSE': '0'}
@@ -98,7 +113,7 @@ class Handler:
 		privatekey_str = key.exportKey()
 		self.userid = builder.get_object('user_id_textbox').get_text()
 		password = builder.get_object('password_textbox').get_text()
-		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password, 'PUB_KEY': publickey_str}}
+		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password, 'PUB_KEY': publickey_str.decode('utf8')}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
 		print("data sent")
@@ -110,6 +125,8 @@ class Handler:
 			f = open(file, 'w')
 			f.write(privatekey_str)
 			f.close()
+			with open(self.userid+".pkl", "wb") as handle:
+				pickle.dump({},handle)
 		print(serverdata)
 		self.display(serverdata['TEXT'])
 		pass
@@ -137,7 +154,8 @@ class Handler:
 		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+input_text)
-
+		pubk = friend_publickey[recvid].importKey()
+		output_text = pubk.encrypt(output_text.encode('utf-8'), 32)
 		data = {'TOKEN': 'SINGLECHAT', 'USERDATA': {'RECV_ID': recvid, 'TEXT': output_text}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
@@ -186,6 +204,12 @@ class Handler:
 		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
+		
+		# combobox = builder.get_object('recipient_dropdown')
+		# store = Gtk.ListStore(int,str)
+		# store.append([i, fid])
+
+
 		####################
 		# add to list
 		####################
@@ -203,6 +227,8 @@ class Handler:
 
 	def quit_window(self, button):
 		print("Killing GUI")
+		with open(self.userid+".pkl", "wb") as handle:
+			pickle.dump(friend_publickey,handle)
 		Gtk.main_quit()
 
 	def recipient_changed(self,combo):
@@ -218,11 +244,17 @@ class Handler:
 	def add_recipients(self):
 		combobox = builder.get_object('recipient_dropdown')
 		store = Gtk.ListStore(int,str)
+		with open(self.userid+".pkl", "rb")as handle:
+			friend_publickey = pickle.load(handle)
 
 		# put the code for actual list of recipients
-		store.append ([1, "SKB"])
-		store.append ([2, "AMS"])
-		store.append ([3, "GSP"])
+		# store.append ([1, "SKB"])
+		# store.append ([2, "AMS"])
+		# store.append ([3, "GSP"])
+		i=1
+		for fid in friend_publickey.keys():
+			store.append([i, fid])
+			i = i+1
 
 		# the function recipient_change
 		combobox.connect('changed',self.recipient_changed)

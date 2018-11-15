@@ -13,10 +13,10 @@ UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
 TOO = '[TOO]'
 
-users = {'a':'a','b':'b'}
 user_port_map = {}
 user_conn_map = {}
 friends = {}
+user_publickey = {}
 
 serverfile = './serverfile.txt'
 f = open(serverfile,'a')
@@ -79,9 +79,18 @@ class Handler:
 		password = data['PASSWORD']
 		user_port_map[userid] = addr[1]
 		user_conn_map[userid] = conn
-		if(userid in users.keys()):
-			if(password == users[userid]):
-				return 1
+		f = open(serverfile, 'r')
+		print("opened")
+		print(userid)
+		print(password)
+		for line in f:
+			value = line.split(',')
+			print(value[0], value[1])
+			if(value[0]==userid):
+				if(password==value[1][:-1]):
+					f.close()
+					return 1			
+
 		return 0	
 
 	def client(self,conn,addr):
@@ -105,6 +114,7 @@ class Handler:
 				flag = 0
 				userid = userdata['USERID']
 				password = userdata['PASSWORD']
+				publickey_str = userdata['PUB_KEY']
 				f = open(serverfile, 'r')
 				for line in f:
 					value = line.split(',')
@@ -120,7 +130,7 @@ class Handler:
 					f = open(serverfile, 'a')
 					f.write(userid+','+password+"\n")
 					f.close()
-					user_publickey[userid] = publickey_str
+					user_publickey[userid] = publickey_str.encode('utf8')
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Signup Successful.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
