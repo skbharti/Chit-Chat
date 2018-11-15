@@ -2,6 +2,11 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+import getpass 
+import socket
+import json
+import ast
+import threading
 
 UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
@@ -15,31 +20,36 @@ user_conn_map = {}
 class Handler:
 
 	def start_server():
-		# this gets executed when 'Start Server' button in Server interface is pressed. 
-		pass
+		host = socket.gethostname()
+		file = open("port.txt","r") 
+		port = int(file.read())+1
+		print("Port: ",port)
+		file.close()
+
+		file = open("port.txt","w") 
+		file.write(str(port))
+		file.close()
+
+		server_socket = socket.socket()
+		server_socket.bind((host, port))
+		server_socket.listen(5)
 
 	def stop_server():
 		# this gets executed when 'Stop Server' button in Server interface is pressed. 
 		pass
+
+	def display(self, button):
+		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
+		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
+		output_text_buffer.set_text(output_text+'\n'+input_text)
+
 
 	def quit_window():
 		# this gets executed when 'Quit' button in File Menu is pressed. 
 		print("Killing GUI")
 		Gtk.main_quit()
 
-host = socket.gethostname()
-file = open("port.txt","r") 
-port = int(file.read())+1
-print("Port: ",port)
-file.close()
 
-file = open("port.txt","w") 
-file.write(str(port))
-file.close()
-
-server_socket = socket.socket()
-server_socket.bind((host, port))
-server_socket.listen(5)
 
 #########################################################
 def client():
