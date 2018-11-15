@@ -8,10 +8,6 @@ import json
 import ast
 import threading
 import json
-import Crypto
-from Crypto.PublicKey import RSA
-from Crypto import Random
-
 
 UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
@@ -21,9 +17,8 @@ users = {'a':'a','b':'b'}
 user_port_map = {}
 user_conn_map = {}
 friends = {}
-user_publickey = {}
 
-serverfile = './serverfile.csv'
+serverfile = './serverfile.txt'
 f = open(serverfile,'a')
 f.close()
 
@@ -110,7 +105,6 @@ class Handler:
 				flag = 0
 				userid = userdata['USERID']
 				password = userdata['PASSWORD']
-				publickey_str = userdata['PUB_KEY']
 				f = open(serverfile, 'r')
 				for line in f:
 					value = line.split(',')

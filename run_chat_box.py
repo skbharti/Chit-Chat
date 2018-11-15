@@ -34,34 +34,6 @@ class Handler:
 		print("Killing GUI")
 		Gtk.main_quit()
 
-def recipient_changed(combo):
-	tree_iter = combo.get_active_iter()
-	if tree_iter is not None:
-		model = combo.get_model()
-		row_id, name = model[tree_iter][:2]
-		print("Selected: ID=%d, name=%s" % (row_id, name))
-	else:
-		entry = combo.get_child()
-		print("Entered: %s" % entry.get_text())
-
-def add_recipients():
-	combobox = builder.get_object('recipient_dropdown')
-	store = Gtk.ListStore(int,str)
-
-	# put the code for actual list of recipients
-	store.append ([1, "SKB"])
-	store.append ([2, "AMS"])
-	store.append ([3, "GSP"])
-
-	# the function recipient_change
-	combobox.connect('changed',recipient_changed)
-	combobox.set_entry_text_column(1)
-	cell = Gtk.CellRendererText()
-	combobox.pack_start(cell,True)
-	combobox.add_attribute(cell, 'text', 0)
-	combobox.set_model(store)
-	combobox.set_active(0)
-
 
 if __name__ == "__main__":
 	builder = Gtk.Builder()

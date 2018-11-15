@@ -17,7 +17,7 @@ friend_publickey = {}
 
 
 class Handler:
-
+	userid = ''
 	def user_login(self, button):
 		# this gets executed when 'Log Me In!' button in User interface is pressed. 
 
@@ -25,9 +25,9 @@ class Handler:
 
 
 		##### if not open the chat box after authentication
-		userid = builder.get_object('user_id_textbox').get_text()
+		self.userid = builder.get_object('user_id_textbox').get_text()
 		password = builder.get_object('password_textbox').get_text()
-		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
+		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password}}
 		data = json.dumps(data)
 		# self.display(data)
 		client_socket.send(data.encode())
@@ -51,7 +51,8 @@ class Handler:
 
 		
 	def recv(self):
-		file = './'+userid+'.txt'
+		self.add_recipients()
+		file = './'+self.userid+'.txt'
 		f = open(file, 'r')
 		privatekey_str = f.read()
 		f.close()
@@ -95,9 +96,9 @@ class Handler:
 		key = RSA.generate(1024, random_generator)
 		publickey_str = key.publickey().exportKey() # pub key export for exchange
 		privatekey_str = key.exportKey()
-		userid = builder.get_object('user_id_textbox').get_text()
+		self.userid = builder.get_object('user_id_textbox').get_text()
 		password = builder.get_object('password_textbox').get_text()
-		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': userid, 'PASSWORD': password, 'PUB_KEY': publickey_str}}
+		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password, 'PUB_KEY': publickey_str}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
 		print("data sent")
@@ -105,7 +106,7 @@ class Handler:
 	
 		token, serverdata = self.parse_json(data_json)
 		if(token=='SUCESS'):
-			file = './'+userid+'.txt'
+			file = './'+self.userid+'.txt'
 			f = open(file, 'w')
 			f.write(privatekey_str)
 			f.close()
@@ -124,12 +125,25 @@ class Handler:
 		return data['TOKEN'], data['SERVERDATA']
 
 	def send_message(self, button):
+		combo = builder.get_object('recipient_dropdown')
+		tree_iter = combo.get_active_iter()
+		if tree_iter is not None:
+			model = combo.get_model()
+			row_id, recvid = model[tree_iter][:2]
+		print(recvid)
 
-		#########
-		# get userid
-		########
-		file = builder.get_object('file_chooser').get_filename()
-		builder.get_object('file_chooser').unselect_all()
+		input_text_buffer = builder.get_object('message_textbox').get_buffer()
+		output_text_buffer = builder.get_object('main_display').get_buffer()
+		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
+		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
+		output_text_buffer.set_text(output_text+'\n'+input_text)
+
+		data = {'TOKEN': 'SINGLECHAT', 'USERDATA': {'RECV_ID': recvid, 'TEXT': output_text}}
+		data = json.dumps(data)
+		client_socket.send(data.encode())
+
+		# file = builder.get_object('file_chooser').get_filename()
+		# builder.get_object('file_chooser').unselect_all()
 		
 		# if(file!=None):
 		# 	tdata = []
@@ -164,11 +178,6 @@ class Handler:
 
 		# this gets executed when 'Send' button in Chat Box interface is pressed.
 		# replace the code; currently just prints the input text to display
-		input_text_buffer = builder.get_object('message_textbox').get_buffer()
-		output_text_buffer = builder.get_object('main_display').get_buffer()
-		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
-		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
-		output_text_buffer.set_text(output_text+'\n'+input_text)
 
 
 		
@@ -196,6 +205,36 @@ class Handler:
 		print("Killing GUI")
 		Gtk.main_quit()
 
+	def recipient_changed(self,combo):
+		tree_iter = combo.get_active_iter()
+		if tree_iter is not None:
+			model = combo.get_model()
+			row_id, name = model[tree_iter][:2]
+			print("Selected: ID=%d, name=%s" % (row_id, name))
+		else:
+			entry = combo.get_child()
+			print("Entered: %s" % entry.get_text())
+
+	def add_recipients(self):
+		combobox = builder.get_object('recipient_dropdown')
+		store = Gtk.ListStore(int,str)
+
+		# put the code for actual list of recipients
+		store.append ([1, "SKB"])
+		store.append ([2, "AMS"])
+		store.append ([3, "GSP"])
+
+		# the function recipient_change
+		combobox.connect('changed',self.recipient_changed)
+		combobox.set_entry_text_column(1)
+		cell = Gtk.CellRendererText()
+		combobox.pack_start(cell,True)
+		combobox.add_attribute(cell, 'text', 0)
+		combobox.set_model(store)
+		combobox.set_active(0)
+
+
+
 
 UNSUCCESSFUL = '[UNSUCCESSFUL]'
 PASSWORD = '[PASSWORD]'
@@ -217,6 +256,7 @@ builder.add_from_file("interfaces/client_interface.glade")
 builder.connect_signals(Handler())
 print("Starting Client Interface GUI")
 window = builder.get_object("main_window")
+# add_recipients()
 window.show_all()
 
 Gtk.main()
