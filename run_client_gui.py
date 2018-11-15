@@ -9,6 +9,12 @@ import socket
 import ast
 import threading
 import json
+import Crypto
+from Crypto.PublicKey import RSA
+from Crypto import Random
+
+friend_publickey = {}
+
 
 class Handler:
 
@@ -30,11 +36,12 @@ class Handler:
 	
 		token, serverdata = self.parse_json(data_json)
 		if(token=='SUCCESS'):
+			window.destroy()
 			builder.add_from_file("interfaces/chat_box.glade")
 			builder.connect_signals(Handler())
 			print("Starting Chat Box GUI")
-			window = builder.get_object("main_window")
-			window.show_all()
+			window2 = builder.get_object("main_window")
+			window2.show_all()
 			
 			t = threading.Thread(target=self.recv, args=())
 			t.daemon = True
@@ -42,22 +49,37 @@ class Handler:
 
 		
 	def recv(self):
+		file = './'+userid+'.txt'
+		f = open(file, 'r')
+		privatekey_str = f.read()
+		f.close()
+		privatekey = privatekey_str.importKey()
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data)
-			self.display(serverdata['TEXT'])
+			msg = privatekey.decrypt(ast.literal_eval(str(serverdata['TEXT'])))
+			self.display(msg)
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
+		random_generator = Random.new().read
+		key = RSA.generate(1024, random_generator)
+		publickey_str = key.publickey().exportKey() # pub key export for exchange
+		privatekey_str = key.exportKey()
 		userid = builder.get_object('user_id_textbox').get_text()
 		password = builder.get_object('password_textbox').get_text()
-		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
+		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': userid, 'PASSWORD': password, 'PUB_KEY': publickey_str}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
 		print("data sent")
 		data_json = client_socket.recv(1024).decode()
 	
 		token, serverdata = self.parse_json(data_json)
+		if(token=='SUCESS'):
+			file = './'+userid+'.txt'
+			f = open(file, 'w')
+			f.write(privatekey_str)
+			f.close()
 		print(serverdata)
 		self.display(serverdata)
 		pass
@@ -118,17 +140,19 @@ class Handler:
 		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
 		output_text_buffer.set_text(output_text+'\n'+input_text)
+
+
 		
 	def add_recipient(self, button):
-		# input_text = builder.get_object('add_recipient_textbox').get_text()
-		# data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
-		# data = json.dumps(data)
-		# client_socket.send(data.encode())
-		# data_json = client_socket.recv(1024).decode()
-		# token, serverdata = self.parse_json(data_json)
-		# self.display(serverdata)
-		# list1 = ['abc']
-		# builder.get_object('recipient_dropdown').addItems(list1)
+		input_text = builder.get_object('add_recipient_textbox').get_text()
+		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
+		data = json.dumps(data)
+		client_socket.send(data.encode())
+		data_json = client_socket.recv(1024).decode()
+		token, serverdata = self.parse_json(data_json)
+		self.display(serverdata)
+		if(token == 'ADDS'):
+			friend_publickey[input_text] = serverdata['PUB_KEY']
 		####################
 		# add to list
 		####################

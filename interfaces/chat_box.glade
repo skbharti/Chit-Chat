@@ -114,7 +114,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBox" id="mycombobox">
+          <object class="GtkComboBox" id="recipient_dropdown">
             <property name="width_request">200</property>
             <property name="height_request">70</property>
             <property name="visible">True</property>
@@ -122,7 +122,7 @@
             <property name="has_entry">True</property>
             <property name="entry_text_column">3</property>
             <child internal-child="entry">
-              <object class="GtkEntry" id="recipient_dropdown">
+              <object class="GtkEntry" id="recipient_entry">
                 <property name="can_focus">False</property>
               </object>
             </child>
