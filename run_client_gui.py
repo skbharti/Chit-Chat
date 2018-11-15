@@ -54,11 +54,11 @@ class Handler:
 		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': userid, 'PASSWORD': password}}
 		data = json.dumps(data)
 		client_socket.send(data.encode())
-
+		print("data sent")
 		data_json = client_socket.recv(1024).decode()
 	
 		token, serverdata = self.parse_json(data_json)
-		
+		print(serverdata)
 		self.display(serverdata)
 		pass
 

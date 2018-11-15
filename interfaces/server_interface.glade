@@ -136,7 +136,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="stop_server" swapped="no"/>
+            <signal name="pressed" handler="stop_server" swapped="no"/>
           </object>
           <packing>
             <property name="x">600</property>

@@ -100,6 +100,7 @@ class Handler:
 					conn.send(data_json.encode())
 
 			elif(token=='SIGNUP'):
+				print("recv")
 				flag = 0
 				userid = userdata['USERID']
 				password = userdata['PASSWORD']
