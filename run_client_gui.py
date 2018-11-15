@@ -45,7 +45,7 @@ class Handler:
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data)
-			self.display(serverdata)
+			self.display(serverdata['TEXT'])
 
 	def user_signup(self, button):
 		# this gets executed when 'Sign Me Up!' button in User interface is pressed. 
@@ -82,10 +82,29 @@ class Handler:
 		output_text_buffer.set_text(output_text+'\n'+input_text)
 		
 	def add_recipient(self, button):
-		# this gets executed when 'Add' button  for adding recipient in Chat Box interface is pressed. 
-		pass
+		print("a")
+		input_text = builder.get_object('add_recipient_textbox').get_text()
+		print("a")
+		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
+		print("a")
+		data = json.dumps(data)
+		print("a")
+		client_socket.send(data.encode())
+		print("a")
+		data_json = client_socket.recv(1024).decode()
+		print("a")
+		token, serverdata = self.parse_json(data_json)
+		print("a")
+		self.display(serverdata)
+		print("a")
+		####################
+		# add to list
+		####################
+
+		print("added")
+		
 	
-	def display_chat():
+	def display_chat(self,data):
 		# this gets should be used to update textboxes
 		output_text_buffer = builder.get_object('main_display').get_buffer()
 		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 

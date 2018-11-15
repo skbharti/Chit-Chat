@@ -16,6 +16,7 @@ TOO = '[TOO]'
 users = {'a':'a','b':'b'}
 user_port_map = {}
 user_conn_map = {}
+friends = {}
 
 serverfile = './serverfile.txt'
 f = open(serverfile,'a')
@@ -122,6 +123,7 @@ class Handler:
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA': 'Signup Successful.'}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
+					friends[userid] = []
 
 			elif(token=='SINGLECHAT'):
 				if(userdata['RECV_ID'] not in user_conn_map.keys()):
@@ -137,6 +139,29 @@ class Handler:
 			
 			elif(token=='GROUPCHAT'):
 				pass
+
+			elif(token=='ADD'):
+				if(userdata['USERID'] not in user_conn_map.keys()):
+					data = {'TOKEN':'ADDRES', 'SERVERDATA':'The user you are looking for is not online.'}
+					data_json = json.dumps(data)
+					conn.send(data_json.encode())
+				else:
+					conn_rec = user_conn_map[userdata['USERID']]
+					data = {'TOKEN': 'POPUP', 'SERVERDATA': userdata['USERID']}
+					data_json = json.dumps(data)
+					conn_rec.send(data_json.encode())
+					data_json = conn_rec.recv(1024).decode()
+					token,response = self.parse_json(data_json)
+					if(response=='0'):
+						data = {'TOKEN': 'ADDRES', 'SERVERDATA': 'The user you are looking rejected chat request'}
+						data_json = json.dumps(data)
+						conn.send(data_json.encode())
+					else:
+						data = {'TOKEN': 'ADDRES', 'SERVERDATA': 'The user added you'}
+						data_json = json.dumps(data)
+						conn.send(data_json.encode())
+						friends[userid].append(userdata['USERID'])
+						friends[userdata['USERID']].append(userid)
 
 			elif(token=='END'):
 				break
