@@ -74,11 +74,10 @@ class Handler:
 
 	def display(self, input_text):
 		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
-		output_text = output_text_buffer.get_text(output_text_buffer.get_start_iter(), output_text_buffer.get_end_iter(), True) 
-		output_text_buffer.set_text(output_text+'\n'+input_text)
+		output_text_buffer.insert_at_cursor(input_text+'\n')
 
 
-	def quit_window(self):
+	def quit_window(self, button):
 		# this gets executed when 'Quit' button in File Menu is pressed. 
 		print("Killing GUI")
 		Gtk.main_quit()

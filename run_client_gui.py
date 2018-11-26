@@ -39,6 +39,10 @@ class Handler:
 			window.destroy()
 			builder.add_from_file("interfaces/chat_box.glade")
 			builder.connect_signals(Handler())
+			main_display = builder.get_object('main_display')
+			main_heading = builder.get_object('main_heading')
+			main_heading.set_text('Welcome '+self.userid+' to Chit-Chat Application!')
+			main_display.set_wrap_mode(1)
 			print("Starting Chat Box GUI")
 			window2 = builder.get_object("main_window")
 			window2.show_all()
@@ -135,7 +139,7 @@ class Handler:
 	def display(self, data):
 		# this gets should be used to update textboxes
 		output_text_buffer = builder.get_object('main_display').get_buffer()
-		output_text_buffer.insert_at_cursor('\n'+data)
+		output_text_buffer.insert_at_cursor(data+'\n')
 
 	def parse_json(self,data_json):
 		data = ast.literal_eval(data_json)
@@ -152,6 +156,8 @@ class Handler:
 
 		input_text_buffer = builder.get_object('message_textbox').get_buffer()
 		input_text = input_text_buffer.get_text(input_text_buffer.get_start_iter(), input_text_buffer.get_end_iter(), True) 
+		self.display('to '+recvid+' : '+input_text)
+
 		print("broadcasting")
 		if(recvid=='broadcast'):
 			data = {'TOKEN': 'BROADCAST', 'USERDATA': {'RECV_ID': recvid, 'TEXT': input_text}}
@@ -161,6 +167,7 @@ class Handler:
 		data = json.dumps(data)
 		input_text_buffer.set_text('')
 		client_socket.send(data.encode())
+
 		
 	def add_recipient(self, button):
 		input_text = builder.get_object('add_recipient_textbox').get_text()

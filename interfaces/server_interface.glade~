@@ -48,6 +48,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="quit_window" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -79,20 +80,6 @@
           </object>
         </child>
         <child>
-          <object class="GtkTextView" id="server_main_display_textbox">
-            <property name="width_request">920</property>
-            <property name="height_request">325</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="editable">False</property>
-            <property name="cursor_visible">False</property>
-          </object>
-          <packing>
-            <property name="x">25</property>
-            <property name="y">125</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkStatusbar">
             <property name="width_request">950</property>
             <property name="height_request">40</property>
@@ -120,7 +107,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="start_server" swapped="no"/>
+            <signal name="pressed" handler="start_server" swapped="no"/>
           </object>
           <packing>
             <property name="x">200</property>
@@ -135,11 +122,30 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="activate" handler="stop_server" swapped="no"/>
+            <signal name="pressed" handler="stop_server" swapped="no"/>
           </object>
           <packing>
             <property name="x">600</property>
             <property name="y">475</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="width_request">920</property>
+            <property name="height_request">325</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTextView" id="server_main_display_textbox">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="x">25</property>
+            <property name="y">125</property>
           </packing>
         </child>
       </object>
