@@ -16,8 +16,7 @@ import pickle
 friend_publickey = {}
 
 class Handler:
-	userid = ''
-	recipient_list = {}
+	user_data = {}
 	def user_login(self, button):
 		# this gets executed when 'Log Me In!' button in User interface is pressed. 
 
@@ -25,9 +24,9 @@ class Handler:
 
 
 		##### if not open the chat box after authentication
-		self.userid = builder.get_object('user_id_textbox').get_text()
-		password = builder.get_object('password_textbox').get_text()
-		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password}}
+		input_user_id = builder.get_object('user_id_textbox').get_text()
+		input_password = builder.get_object('password_textbox').get_text()
+		data = {'TOKEN': 'AUTH', 'USERDATA': {'USERID': input_user_id, 'PASSWORD': input_password}}
 		data = json.dumps(data)
 		# self.display(data)
 		client_socket.send(data.encode())
@@ -36,12 +35,14 @@ class Handler:
 	
 		token, serverdata = self.parse_json(data_json)
 		if(token=='SUCCESS'):
+			self.user_data = serverdata['USERDATA']
+			self.save_user_data()
 			window.destroy()
 			builder.add_from_file("interfaces/chat_box.glade")
 			builder.connect_signals(Handler())
 			main_display = builder.get_object('main_display')
 			main_heading = builder.get_object('main_heading')
-			main_heading.set_text('Welcome '+self.userid+' to Chit-Chat Application!')
+			main_heading.set_text('Welcome '+self.user_data['user_id']+' to Chit-Chat Application!')
 			main_display.set_wrap_mode(1)
 			print("Starting Chat Box GUI")
 			window2 = builder.get_object("main_window")
@@ -57,6 +58,10 @@ class Handler:
 
 		
 
+	def save_user_data(self):
+		file = open('data/client/'+self.user_data['user_id']+'.pickle', 'wb')
+		pickle.dump(self.user_data, file)
+		file.close()
 
 	def recv(self):
 		while(True):
@@ -114,10 +119,10 @@ class Handler:
 
 
 	def user_signup(self, button):
-		self.userid = builder.get_object('user_id_textbox').get_text()
-		password = builder.get_object('password_textbox').get_text()
+		input_user_id = builder.get_object('user_id_textbox').get_text()
+		input_password = builder.get_object('password_textbox').get_text()
 		# data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password, 'PUB_KEY': publickey_str.decode('utf8')}}
-		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': self.userid, 'PASSWORD': password}}
+		data = {'TOKEN': 'SIGNUP', 'USERDATA': {'USERID': input_user_id, 'PASSWORD': input_password}}
 
 		data = json.dumps(data)
 		client_socket.send(data.encode())
@@ -126,14 +131,9 @@ class Handler:
 	
 		token, serverdata = self.parse_json(data_json)
 		if(token=='SUCCESS'):
-			print("HAHAHA")
-			# file = './'+self.userid+'.txt'
-			# f = open(file, 'w')
-			# f.write(privatekey_str.decode('utf8'))
-			# f.close()
-			with open("./"+self.userid+".pkl", "wb") as handle:
-				pickle.dump({},handle)
-		print(serverdata)
+			print("User SignUp Success!")
+			builder.get_object('user_id_textbox').set_text('')
+			builder.get_object('password_textbox').set_text('')
 		self.display(serverdata['TEXT'])
 
 	def display(self, data):
@@ -199,15 +199,11 @@ class Handler:
 			print("Entered: %s" % entry.get_text())
 
 	def add_recipients(self):
-		recipient_list = {'aa':'123','bb':'123','cc':'123','dd':'123','broadcast':'123'}
-		pickle.dump(recipient_list, open(self.userid+'.pkl', 'wb'))
 		combobox = builder.get_object('recipient_dropdown')
 		store = Gtk.ListStore(int,str)
-		with open(self.userid+".pkl", "rb")as handle:
-			friend_publickey = pickle.load(handle)
-
+		print(self.user_data['recipient_list'])
 		i=1
-		for fid in friend_publickey.keys():
+		for fid in self.user_data['recipient_list']:
 			store.append([i, fid])
 			i = i+1
 

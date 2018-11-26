@@ -2,6 +2,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+import pickle
 import getpass 
 import socket
 import json
@@ -26,6 +27,7 @@ f.close()
 class Handler:
 	server_socket = 0
 	state = 0
+	user_data = {}
 	def start_server(self,button):
 		if(self.state):
 			self.display("Server already Online.")
@@ -76,6 +78,26 @@ class Handler:
 		output_text_buffer = builder.get_object('server_main_display_textbox').get_buffer()
 		output_text_buffer.insert_at_cursor(input_text+'\n')
 
+	def create_user_data(self,user_id):
+		user_data = {}
+		user_data['user_id']=user_id
+		user_data['recipient_list']={'aa':'123','bb':'123','cc':'123','dd':'123','broadcast':'123'}
+		user_data['groups_list']=[]
+
+		file = open('data/server/'+user_id+'.pickle', 'wb')
+		pickle.dump(user_data, file)
+		file.close()
+
+	def save_user_data(self,user_data):
+		file = open('data/server/'+user_data['user_id']+'.pickle', 'wb')
+		pickle.dump(user_data, file)
+		file.close()
+
+	def load_user_data(self,user_id):
+		file = open('data/server/'+user_id+'.pickle', 'rb')
+		user_data = pickle.load(file)
+		file.close()
+		return user_data
 
 	def quit_window(self, button):
 		# this gets executed when 'Quit' button in File Menu is pressed. 
@@ -109,7 +131,8 @@ class Handler:
 				userid = userdata['USERID']
 				response = self.authenticate(userdata, addr, conn)
 				if(response==1):
-					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Authentication Successful'}}
+					user_data = self.load_user_data(userid)
+					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Authentication Successful', 'USERDATA':user_data}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
@@ -140,6 +163,7 @@ class Handler:
 					f.close()
 					# user_publickey[userid] = publickey_str.encode('utf8')
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Signup Successful.'}}
+					self.create_user_data(userid)
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 					friends[userid] = []
