@@ -16,12 +16,10 @@ TOO = '[TOO]'
 
 user_port_map = {}
 user_conn_map = {}
+conn_user_map = {}
+
 friends = {}
 user_publickey = {}
-
-serverfile = './serverfile.txt'
-f = open(serverfile,'a')
-f.close()
 
 
 class Handler:
@@ -81,7 +79,7 @@ class Handler:
 	def create_user_data(self,user_id):
 		user_data = {}
 		user_data['user_id']=user_id
-		user_data['recipient_list']={'aa':'123','bb':'123','cc':'123','dd':'123','broadcast':'123'}
+		user_data['recipient_list']={'aa':'123','bb':'123','cc':'123','zz':'123','broadcast':'123'}
 		user_data['groups_list']=[]
 
 		file = open('data/server/'+user_id+'.pickle', 'wb')
@@ -90,6 +88,15 @@ class Handler:
 
 	def save_user_data(self,user_data):
 		file = open('data/server/'+user_data['user_id']+'.pickle', 'wb')
+		pickle.dump(user_data, file)
+		file.close()
+
+	def update_user_data(self,user_id, recp_id):
+		file = open('data/server/'+user_id+'.pickle', 'rb')
+		user_data = pickle.load(file)
+		file.close()
+		user_data['recipient_list'].extend([recp_id])
+		file = open('data/server/'+user_id+'.pickle', 'rb')
 		pickle.dump(user_data, file)
 		file.close()
 
@@ -109,17 +116,29 @@ class Handler:
 		password = data['PASSWORD']
 		user_port_map[userid] = addr[1]
 		user_conn_map[userid] = conn
-		f = open(serverfile, 'r')
-		# print("opened")
-		# print(userid)
-		# print(password)
-		for line in f:
-			value = line.split(',')
-			# print(value[0], value[1])
-			if(value[0]==userid):
-				if(password==value[1][:-1]):
-					f.close()
-					return 1			
+		conn_user_map[conn] = userid
+
+		file = open('data/server/serverfile.pickle', 'rb')
+		server_data = pickle.load(file)
+		file.close()
+
+		auth_data = server_data['auth_list']
+		if(userid in list(auth_data.keys())):
+			if(password == auth_data[userid]):
+				print('user in the list')
+				return 1
+		return 0
+		# f = open(serverfile, 'r')
+		# # print("opened")
+		# # print(userid)
+		# # print(password)
+		# for line in f:
+		# 	value = line.split(',')
+		# 	# print(value[0], value[1])
+		# 	if(value[0]==userid):
+		# 		if(password==value[1][:-1]):
+		# 			f.close()
+		# 			return 1			
 
 		return 0	
 
@@ -146,21 +165,26 @@ class Handler:
 				userid = userdata['USERID']
 				password = userdata['PASSWORD']
 				# publickey_str = userdata['PUB_KEY']
-				f = open(serverfile, 'r')
-				for line in f:
-					value = line.split(',')
-					if(value[0]==userid):
-						flag = 1
-						break
-				f.close()
-				if(flag==1):
+				file = open('data/server/serverfile.pickle', 'rb')
+				server_data = pickle.load(file)
+				user_list = server_data['auth_list'].keys()
+				# f = open(serverfile, 'r')
+				# for line in f:
+				# 	value = line.split(',')
+				# 	if(value[0]==userid):
+				# 		flag = 1
+				# 		break
+				file.close()
+				print('here')
+				if(userid in user_list):
 					data = {'TOKEN': 'UNSUCCESS', 'SERVERDATA':{'TEXT': 'Signup Unsuccessful, username already exists.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
-					f = open(serverfile, 'a')
-					f.write(userid+','+password+"\n")
-					f.close()
+					file = open('data/server/serverfile.pickle', 'wb')
+					server_data['auth_list'][userid]=password
+					pickle.dump(server_data, file)
+					file.close()
 					# user_publickey[userid] = publickey_str.encode('utf8')
 					data = {'TOKEN': 'SUCCESS', 'SERVERDATA':{'TEXT': 'Signup Successful.'}}
 					self.create_user_data(userid)
@@ -190,33 +214,36 @@ class Handler:
 			elif(token=='GROUPCHAT'):
 				pass
 
-			elif(token=='ADD'):
+			elif(token=='ADD_RECIPIENT_REQUEST_BY_SENDER'):
+				print("Server recieved request")
 				if(userdata['USERID'] not in user_conn_map.keys()):
-					data = {'TOKEN':'ADDF', 'SERVERDATA': {'TEXT': 'The user you are looking for is not online.'}}
+					data = {'TOKEN':'ADDFAIL', 'SERVERDATA': {'TEXT': 'The user you are looking for is not online.'}}
 					data_json = json.dumps(data)
 					conn.send(data_json.encode())
 				else:
 					conn_rec = user_conn_map[userdata['USERID']]
-					data = {'TOKEN': 'POPUP', 'SERVERDATA': userdata['USERID']}
+					print("Server forwarding request.")
+					data = {'TOKEN': 'ADD_RECIPIENT_REQUEST_TO_RECIPIENT', 'SERVERDATA': userdata['USERID']}
 					data_json = json.dumps(data)
 					conn_rec.send(data_json.encode())
 					data_json = conn_rec.recv(1024).decode()
 					token,response = self.parse_json(data_json)
 					if(response=='0'):
-						data = {'TOKEN': 'ADDF', 'SERVERDATA': {'TEXT': 'The user you are looking rejected chat request'}}
+						data = {'TOKEN': 'ADD_FAIL_TO_SENDER', 'SERVERDATA': {'TEXT': 'The user you are looking rejected chat request'}}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
 					else:
-						data = {'TOKEN': 'ADDS', 'SERVERDATA':{'TEXT': 'The user added you', 'USER_ID': userdata['USERID']}}
+						data = {'TOKEN': 'ADD_SUCCESS_TO_SENDER', 'SERVERDATA':{'TEXT': 'The user approved your request.', 'USER_ID': userdata['USERID']}}
 
 						# data = {'TOKEN': 'ADDS', 'SERVERDATA':{'TEXT': 'The user added you', 'PUB_KEY': user_publickey[userdata['USERID']], 'USER_ID': userdata['USERID']}}
 						data_json = json.dumps(data)
 						conn.send(data_json.encode())
-						data = {'TOKEN': 'ADDS', 'SERVERDATA': {'TEXT': 'Public Key delivered', 'USER_ID': userid}}
-						data_json = json.dumps(data)
-						conn_rec.send(data_json.encode())
-						friends[userid].append(userdata['USERID'])
-						friends[userdata['USERID']].append(userid)
+						self.update_user_data(conn_user_map[userid], userdata['USERID'])
+						# data = {'TOKEN': 'ADDS', 'SERVERDATA': {'TEXT': 'Public Key delivered', 'USER_ID': userid}}
+						# data_json = json.dumps(data)
+						# conn_rec.send(data_json.encode())
+						# friends[userid].append(userdata['USERID'])
+						# friends[userdata['USERID']].append(userid)
 
 			# elif(token=='SFILE'):
 			# 	if(userdata['RECV_ID'] not in user_conn_map.keys()):
@@ -257,12 +284,6 @@ def accept():
 		t.join()
 
 	server_socket.close()
-
-
-
-
-
-
 
 builder = Gtk.Builder()
 builder.add_from_file("interfaces/server_interface.glade")

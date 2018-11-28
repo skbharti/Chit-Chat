@@ -42,13 +42,14 @@ class Handler:
 			builder.connect_signals(Handler())
 			main_display = builder.get_object('main_display')
 			main_heading = builder.get_object('main_heading')
+			print('----------------------'+self.user_data['user_id']+'---------------------')
 			main_heading.set_text('Welcome '+self.user_data['user_id']+' to Chit-Chat Application!')
 			main_display.set_wrap_mode(1)
 			print("Starting Chat Box GUI")
 			window2 = builder.get_object("main_window")
 			window2.show_all()
 			self.display('You are successfully logged in now!')
-			self.add_recipients()
+			self.update_recipients_dropdown()
 			
 			t = threading.Thread(target=self.recv, args=())
 			t.daemon = True
@@ -67,17 +68,23 @@ class Handler:
 		while(True):
 			data_json = client_socket.recv(1024).decode()
 			token, serverdata = self.parse_json(data_json)
-			if(token=='POPUP'):
-				builder.add_from_file("interfaces/connect_request.glade")
-				builder.connect_signals(Handler())
-				print("Starting Client Interface GUI")
-				window3 = builder.get_object("main_window")
-				window3.show_all()
 
-			if(token == 'ADDS'):
-				friend_publickey[serverdata['USER_ID']] = serverdata['PUB_KEY']
+			if(token=='ADD_RECIPIENT_REQUEST_TO_RECIPIENT'):
+				print("Recipient recieved request.")
+				# dialog = Gtk.FileChooserDialog("Please choose a folder", None,Gtk.FileChooserAction.SELECT_FOLDER,(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,"Select", Gtk.ResponseType.OK))
+				# dialog.set_default_size(800, 400)
+
+				# response = dialog.run()
+				# if response == Gtk.ResponseType.OK:
+				# 	print("Select clicked")
+				# 	print("Folder selected: " + dialog.get_filename())
+				# elif response == Gtk.ResponseType.CANCEL:
+				# 	print("Cancel clicked")
+
+				# dialog.destroy()
+
+			if(token == 'ADD_SUCCESS_TO_SENDER'):
 				self.display(serverdata['TEXT'])
-
 				combobox = builder.get_object('recipient_dropdown')
 				store = Gtk.ListStore(int,str)
 				store.append([len(friend_publickey), serverdata['USER_ID']])
@@ -89,6 +96,9 @@ class Handler:
 				combobox.set_model(store)
 				combobox.set_active(0)
 
+
+			if(token == 'ADD_FAIL_TO_SENDER'):
+				self.display(serverdata['TEXT'])	
 
 			
 			if(token=='SINGLECHAT'):
@@ -102,11 +112,8 @@ class Handler:
 				msg = serverdata['TEXT']
 				self.display('broadcast from  '+serverdata['SEND_ID']+' : '+msg)
 
-			if(token == 'ADDF'):
-				self.display(serverdata['TEXT'])	
-
 	def accept_request(self, button):
-		data = {'TOKEN': 'ADDS', 'RESPONSE': '1'}
+		data = {'TOKEN': 'ADDSUCCESS', 'RESPONSE': '1'}
 		data_json = json.dumps(data)
 		client_socket.send(data_json)
 
@@ -116,6 +123,9 @@ class Handler:
 		data_json = json.dumps(data)
 		client_socket.send(data_json)
 			
+	def update_recipient_list(recp_id):
+		self.user_data['recipient_list'].append(recp_id)
+		self.update_recipients_dropdown()
 
 
 	def user_signup(self, button):
@@ -167,14 +177,6 @@ class Handler:
 		data = json.dumps(data)
 		input_text_buffer.set_text('')
 		client_socket.send(data.encode())
-
-		
-	def add_recipient(self, button):
-		input_text = builder.get_object('add_recipient_textbox').get_text()
-		data = {'TOKEN': 'ADD', 'USERDATA': {'USERID': input_text}}
-		data = json.dumps(data)
-		client_socket.send(data.encode())
-		
 	
 	def display_chat(self,data):
 		# this gets should be used to update textboxes
@@ -186,7 +188,14 @@ class Handler:
 		print("Killing GUI")
 		# with open(self.userid+".pkl", "wb") as handle:
 		# 	pickle.dump(friend_publickey,handle)
+		client_socket.close()
 		Gtk.main_quit()
+
+	def add_recipient(self, button):
+		input_text = builder.get_object('add_recipient_textbox').get_text()
+		data = {'TOKEN': 'ADD_RECIPIENT_REQUEST_BY_SENDER', 'USERDATA': {'USERID': input_text}}
+		data = json.dumps(data)
+		client_socket.send(data.encode())
 
 	def recipient_changed(self,combo):
 		tree_iter = combo.get_active_iter()
@@ -198,7 +207,8 @@ class Handler:
 			entry = combo.get_child()
 			print("Entered: %s" % entry.get_text())
 
-	def add_recipients(self):
+	def update_recipients_dropdown(self):
+		group_list = {'group:g1':['aa','bb'],'group:g2':['bb','cc'],'group:g3':['cc','zz']}
 		combobox = builder.get_object('recipient_dropdown')
 		store = Gtk.ListStore(int,str)
 		print(self.user_data['recipient_list'])
@@ -206,6 +216,10 @@ class Handler:
 		for fid in self.user_data['recipient_list']:
 			store.append([i, fid])
 			i = i+1
+		for gid in group_list.keys():
+			print(gid)
+			store.append([i, gid])
+			i=i+1
 
 		# the function recipient_change
 		combobox.connect('changed',self.recipient_changed)
